@@ -1,0 +1,283 @@
+﻿@page "/adduser"
+<PageTitle>Add User</PageTitle>
+
+@attribute [Authorize(Roles = "User,Admin,Supper")]
+@using System.Text.RegularExpressions
+@using System.ComponentModel.DataAnnotations
+@using ERPHamza.Data
+@using System.Net.Http.Json
+@using System.Text;
+@using Newtonsoft.Json
+@inject HttpClient Http
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+@inject IDialogService DialogService
+@using MudBlazor
+@using System.Security.Cryptography;
+
+
+
+
+<AuthorizeView>
+
+	<Authorized>
+
+<MudPaper Elevation="0" Class="pa-4">
+    <MudText Typo="Typo.h4" GutterBottom="true">Add User</MudText>
+
+    <MudTextField @bind-Value="fullName" Label="Full Name" Variant="Variant.Outlined" />
+    <MudTextField @bind-Value="username" Label="Username" Variant="Variant.Outlined" />
+    <MudTextField @bind-Value="email" Label="Email" Variant="Variant.Outlined" />
+    <MudTextField @bind-Value="password"  Label="Password" Variant="Variant.Outlined" Password="true" />
+
+    <MudText Typo="Typo.h6" GutterBottom="true">Access</MudText>
+
+    <MudGrid>
+        <MudItem xs="12" sm="4">
+            @foreach (var item in accessLeft)
+            {
+                <MudCheckBox @bind-Checked="item.Checked" Label="@item.Name" />
+            }
+        </MudItem>
+        <MudItem xs="12" sm="4">
+            @foreach (var item in accessMiddle)
+            {
+                <MudCheckBox @bind-Checked="item.Checked" Label="@item.Name" />
+            }
+        </MudItem>
+        <MudItem xs="12" sm="4">
+            @foreach (var item in accessRight)
+            {
+                <MudCheckBox @bind-Checked="item.Checked" Label="@item.Name" />
+            }
+        </MudItem>
+    </MudGrid>
+
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveUSer">Save</MudButton>
+    <MudButton Href="/" Variant="Variant.Outlined" >Exit</MudButton>
+ 
+
+    <MudText Typo="Typo.subtitle1" GutterBottom="true">Selected Access:</MudText>
+    <MudList>
+        @foreach (var access in selectedAccessIds)
+        {
+            <MudListItem>@access</MudListItem>
+        }
+    </MudList>
+</MudPaper>
+    </Authorized>
+    <NotAuthorized>
+        <MudAlert ShowCloseIcon="true" CloseIconClicked="Navi" Severity="Severity.Error" Variant="Variant.Filled">
+            <MudAlertTitle>Access Denied</MudAlertTitle>
+            <MudAlertDescription>You are not authorized to access this page. Please Login</MudAlertDescription>
+        </MudAlert>
+        </NotAuthorized>
+</AuthorizeView>
+@code{
+    public void Navi()
+    {
+        NavigationManager.NavigateTo("/", forceLoad: true);
+    }
+
+    private string fullName;
+    private string username;
+    private string password;
+    private string email;
+    private string NewUid;
+    private int uID=0;
+
+    private List<int> selectedAccessIds = new List<int>();
+
+    private List<AccessItem> accessLeft = new List<AccessItem>
+    {
+        new AccessItem(1, "Add New Job"),
+        new AccessItem(2, "Survey Booked"),
+        new AccessItem(3, "Survey Done"),
+        new AccessItem(4, "EPR Done"),
+        new AccessItem(5, "Contribution Job"),
+        new AccessItem(6, "Agreement Booked"),
+        new AccessItem(7, "Customer Agreed"),
+        new AccessItem(8, "Pas/loft Installation"),
+        new AccessItem(9, "Ipad Queue"),
+        new AccessItem(10, "Loft Installations"),
+        new AccessItem(11, "BIR Installations")
+    };
+
+    private List<AccessItem> accessMiddle = new List<AccessItem>
+    {
+        new AccessItem(12, "IWI Installations"),
+        new AccessItem(13, "Boiler Installations"),
+        new AccessItem(14, "HC Installations"),
+        new AccessItem(15, "Solar PV Installations"),
+        new AccessItem(16, "ASHP Installations"),
+        new AccessItem(17, "RC Instructed"),
+        new AccessItem(18, "Installs Done"),
+        new AccessItem(19, "Post Stage Done"),
+        new AccessItem(20, "GDGC Done"),
+        new AccessItem(21, "Lodgement Done"),
+        new AccessItem(22, "Submission Done")
+    };
+
+    private List<AccessItem> accessRight = new List<AccessItem>
+    {
+        new AccessItem(23, "Job Closed"),
+        new AccessItem(24, "Payment Recived"),
+        new AccessItem(25, "Checklist"),
+        new AccessItem(26, "Job Queries"),
+        new AccessItem(27, "Survey Reporting"),
+        new AccessItem(28, "Lead Gen Reporting"),
+        new AccessItem(29, "Installer Reporting"),
+        new AccessItem(30, "Incepection Report"),
+        new AccessItem(31, "Contractors"),
+        new AccessItem(32, "Job Reversing"),
+        new AccessItem(33, "Accounts Reporting")
+    };
+
+
+
+
+
+    public class AccessItem
+    {
+        public AccessItem(int id, string name, bool isChecked = false)
+        {
+            Id = id;
+            Name = name;
+            Checked = isChecked;
+        }
+
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public bool Checked { get; set; }
+    }
+
+    private async Task GetSelectedAccess()
+    {
+        selectedAccessIds = accessLeft.Concat(accessMiddle).Concat(accessRight)
+                            .Where(x => x.Checked)
+                            .Select(x => x.Id)
+                            .ToList();
+
+        var userAccess = new UserAccess
+            {
+                UserId = uID, // Assign the appropriate user ID here
+                PagesIDs = selectedAccessIds.Select(id => new PageIdItem { PageId = id }).ToList()
+            };
+        try
+        {
+            var jsonData = JsonConvert.SerializeObject(new List<UserAccess> { userAccess });
+            using var httpClient = new HttpClient();
+            // string jsonData = JsonConvert.SerializeObject(data);
+            var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+            var response = await httpClient.PostAsync(constant.AddRights, content);
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add("User & Rights Added", Severity.Success);
+
+            }
+            else
+            {
+
+                var errorMessage = await response.Content.ReadAsStringAsync();
+                Snackbar.Add(errorMessage, Severity.Error);
+            }
+
+
+        }
+        catch (Exception e)
+        {
+            Snackbar.Add("Error: Call To Developer", Severity.Error);
+        }
+    }
+
+
+    public class PageIdItem
+    {
+        public int PageId { get; set; }
+    }
+
+    public class UserAccess
+    {
+        public int UserId { get; set; }
+        public List<PageIdItem> PagesIDs { get; set; }
+    }
+
+
+
+
+
+
+
+
+    private string hashedPassword = "";
+
+    private void HashPassword(string password)
+    {
+        using (SHA256 sha256 = SHA256.Create())
+        {
+            byte[] hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+            StringBuilder builder = new StringBuilder();
+
+            foreach (byte b in hashedBytes)
+            {
+                builder.Append(b.ToString("x2")); // Convert the byte to a hexadecimal string
+            }
+
+            hashedPassword = builder.ToString();
+        }
+    }
+    private async Task SaveUSer()
+    {
+        HashPassword(password);
+        try
+        {
+            if(email == "" || password == "")
+            {
+                Snackbar.Add("Email & Password is Required !", Severity.Error);
+                return;
+            }
+
+            var data = new
+            {
+
+
+                Name = fullName,
+                UName = username,
+                Password = hashedPassword,
+                Email = email,
+                Role = "Any"
+
+                // Add other properties as needed
+            };
+            using var httpClient = new HttpClient();
+            string jsonData = JsonConvert.SerializeObject(data);
+            var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+            var response = await httpClient.PostAsync(constant.Register, content);
+
+            if (response.IsSuccessStatusCode)
+            {
+
+                NewUid = await response.Content.ReadAsStringAsync(); 
+                uID = Int32.Parse(NewUid);
+                if(uID != 0)
+                {
+                    GetSelectedAccess();
+                }
+
+                
+                StateHasChanged();
+            }
+            else
+            {
+
+                var errorMessage = await response.Content.ReadAsStringAsync();
+                Snackbar.Add(errorMessage, Severity.Error);
+            }
+        }
+        catch (Exception e)
+        {
+            Snackbar.Add("Error: Call To Developer", Severity.Error);
+        }
+    }
+
+}

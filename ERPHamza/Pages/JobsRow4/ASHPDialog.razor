@@ -1,0 +1,235 @@
+﻿@using ERPHamza.Data
+@using System.Net.Http.Json
+@using System.Text;
+@using ERPHamza.Data.MyClasses
+@using Newtonsoft.Json
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+<style>
+
+    /* Optional: You can add CSS to style the table */
+    .mud-dialog-content {
+        background: #F3F3F3;
+    }
+
+    .card {
+        box-shadow: 0 1rem 2rem hsl(0 0% 0% / 20%);
+        gap: 5vmin;
+        background: hsl(0 0% 100%);
+        color: hsl(200 50% 20%);
+        line-height: 1.5;
+        font-size: 1.5rem;
+        font-weight: 300;
+        width: 100%;
+        height: 35vmin;
+        display: flex;
+        border-radius: 1ch;
+        border: 1px solid hsl(0 0% 83%);
+        display: grid;
+        grid-auto-flow: column;
+    }
+
+
+
+    my {
+        block-size: 100%;
+        inline-size: 100%;
+        background: hsl(0 0% 85%);
+    }
+
+</style>
+<MudDialog TitleClass="mud-primary">
+    <TitleContent>
+        <MudText Typo="Typo.h6" style="color: white;">ASHP Installation</MudText>
+    </TitleContent>
+    <DialogContent>
+
+        <MudCard>
+            <MudCardContent>
+                <MudGrid>
+                    <!-- First row -->
+                    <MudItem xs="4">
+                        @if (loaded)
+                        {
+                            <MudSelect Variant="Variant.Outlined" Margin="Margin.Dense" Label="ASHP Installer" @bind-Value="selectedMake">
+                                <MudSelectItem T="string" Value="null" Label="Select" />
+                                @foreach (var make in MakeList)
+                                {
+                                    <MudSelectItem Value="make" Label="@make" />
+                                }
+                            </MudSelect>
+                        }
+                    </MudItem>
+                    <MudItem xs="4">
+                        <MudDatePicker DateFormat="dd/MM/yyyy" Margin="Margin.Dense" Label="Date" @bind-Date="date" />
+                    </MudItem>
+                    <MudItem xs="4">
+                        <MudTimePicker Label="12 hours" Margin="Margin.Dense" AmPm="true" Editable="true" @bind-Time="time" />
+                    </MudItem>
+
+                    <MudItem xs="4" style="justify-content:flex-end;margin-left:80%">
+                        <MudButton Disabled="@_processing" OnClick="UpdateJobToAshp" Variant="Variant.Filled" Color="Color.Success">
+                            @if (_processing)
+                            {
+                                <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                                <MudText Class="ms-2">Processing</MudText>
+                            }
+                            else
+                            {
+                                <MudText>Done</MudText>
+                            }
+                        </MudButton>
+                    </MudItem>
+
+                </MudGrid>
+
+            </MudCardContent>
+        </MudCard>
+
+
+
+
+
+    </DialogContent>
+    @*     <DialogActions>
+    <MudButton OnClick="Cancel">Cancel</MudButton>
+    <MudButton Color="Color.Primary" OnClick="Submit">Ok</MudButton>
+    </DialogActions> *@
+</MudDialog>
+
+
+@code{
+    private bool _processing = false;
+    DateTime? date = DateTime.Today;
+    DateTime londonTime;
+    TimeSpan? time = new TimeSpan(18, 45, 00); // Example time
+    private string formattedTime;
+    private void OnTimePickerClosed()
+    {
+        if (time.HasValue)
+        {
+            DateTime dateTime = DateTime.Today.Add(time.Value);
+            formattedTime = dateTime.ToString("hh:mm tt");
+        }
+        else
+        {
+            formattedTime = "No time selected";
+        }
+    }
+
+
+
+
+
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    void Submit() => MudDialog.Close(DialogResult.Ok(true));
+    void Cancel() => MudDialog.Cancel();
+
+
+    protected override async void OnInitialized()
+    {
+
+        //base.OnInitialized();
+
+        await makeList();
+    }
+
+    private string selectedMake;
+    bool loaded = false;
+    private List<string> MakeList;
+    private async Task makeList()
+    {
+        try
+        {
+
+
+
+            var client = new HttpClient();
+            var response = await client.GetAsync(constant.GetASHPInstallerName);
+            if (response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                MakeList = JsonConvert.DeserializeObject<List<string>>(content);
+                loaded = true;
+                StateHasChanged();
+
+            }
+            else
+            {
+                var errorMessage = await response.Content.ReadAsStringAsync();
+                Snackbar.Add(errorMessage, Severity.Error);
+            }
+        }
+        catch (Exception e)
+        {
+
+            Snackbar.Add(e.ToString(), Severity.Error);
+        }
+    }
+
+    private async Task UpdateJobToAshp()
+
+    {
+        DateTime utcTime = DateTime.UtcNow;
+        TimeZoneInfo londonTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Europe/London");
+        londonTime = TimeZoneInfo.ConvertTimeFromUtc(utcTime, londonTimeZone);
+        _processing = true;
+        using (var httpClient = new HttpClient())
+            try
+            {
+
+                var Data = new
+                {
+                    Id = constant.FormId,
+                    AshipName = selectedMake,
+                    AshipDate = date,
+                    AshipTime = formattedTime
+
+
+                };
+
+
+                string jsonData = JsonConvert.SerializeObject(Data);
+                var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+
+                var response = await httpClient.PostAsync(constant.UpdateJobToAshp, content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    _processing = false;
+                  
+                    MudDialog.Close(DialogResult.Ok(true));
+                    var message = await response.Content.ReadAsStringAsync();
+                    StateHasChanged();
+
+                    DeleteRecordClass.DeleteRecordInFormJob(constant.FormId, 16);
+                    AddRecordClass.AddRecordInFormJob(constant.FormId, 40);
+                    AuditClasss.Audit(constant.FormId, constant.LoginUserName, londonTime, "ASHP Booking");
+
+                    NavigationManager.NavigateTo("/ASHPInstallation", forceLoad: true);
+                    Snackbar.Add(message, Severity.Success);
+                }
+                else
+                {
+                    _processing = false;
+                    var errorMessage = await response.Content.ReadAsStringAsync();
+                    Snackbar.Add(errorMessage, Severity.Error);
+
+
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+
+                _processing = false;
+                Snackbar.Add(ex.Message, Severity.Error);
+            }
+
+    }
+
+
+
+}

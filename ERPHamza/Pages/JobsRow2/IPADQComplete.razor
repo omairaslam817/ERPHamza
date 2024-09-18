@@ -1,0 +1,252 @@
+﻿<PageTitle>IPAD Q Complete</PageTitle>
+
+@page "/IPADQComplete"
+@using System.Text.RegularExpressions
+@using System.ComponentModel.DataAnnotations
+@using ERPHamza.Data
+@using System.Net.Http.Json
+@using System.Text;
+@using ERPHamza.Data.MyClasses
+@using Newtonsoft.Json
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+@inject IDialogService DialogService
+<style>
+    .mud-appbar .mud-toolbar-appbar {
+        background-color: #FFFFFF;
+    }
+
+
+
+    .mud-appbar .mud-toolbar-appbar {
+        background-color: #FFFFFF;
+    }
+</style>
+
+<AuthorizeView>
+    <Authorized>
+
+
+
+<div class="card-header mt-2">
+    <h5>IPAD Queue Complete</h5>
+</div>
+
+@if (loading)
+{
+    <center style="margin-top:5%;">
+        <img src="macGif.gif" alt="Loading" width="30" height="30">
+    </center>
+
+}
+else
+{
+    <table class="table mt-8 mr-2 ml-2">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">RefNo</th>
+                <th scope="col">Survey Name</th>
+                <th scope="col">Address</th>
+                <th scope="col">Action</th>
+            </tr>
+        </thead>
+
+        @if (formList.Count > 0)
+        {
+            <tbody>
+                @foreach (var result in formList)
+                {
+
+                    <tr>
+                        <th scope="row">@(formList.IndexOf(result) + 1)</th>
+                        <td>@result.JobFormRecord.RefNo</td>
+                        <td>@result.JobFormRecord.SurveyName</td>
+                        <td>@result.JobFormRecord.AddressLine1</td>
+                        <td>
+                                    <MudButton OnClick="@((e) => GoToJob(result))" Variant="Variant.Outlined" Color="Color.Success" style="margin-right:50px">Job Details</MudButton>
+
+
+                                    <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Check" Color="Color.Success" OnClick="@((e) => OpenDialog3(result))" style="margin-left:20px">RC Instructed</MudButton>
+               
+
+
+                        </td>
+                    </tr>
+
+                }
+            </tbody>
+        }
+
+
+
+
+    </table>
+
+    @if (formList.Count == 0)
+    {
+        <img class="center" style="height:300px;width:300px; display: block; margin-left: auto;   margin-right: auto;" src="nodata.gif">
+    }
+}
+    </Authorized>
+    <NotAuthorized>
+        <MudAlert ShowCloseIcon="true" CloseIconClicked="Navi" Severity="Severity.Error" Variant="Variant.Filled">
+            <MudAlertTitle>Access Denied</MudAlertTitle>
+            <MudAlertDescription>You are not authorized to access this page. Please Login</MudAlertDescription>
+        </MudAlert>
+        </NotAuthorized>
+</AuthorizeView>
+@code{
+    public void GoToJob(FormModel result){constant.FormId = result.JobFormRecord.Id;NavigationManager.NavigateTo("/job", true);}
+    public void Navi()
+    {
+        NavigationManager.NavigateTo("/", forceLoad: true);
+    }
+    bool loading = true;
+    DialogOptions maxWidth = new DialogOptions() { MaxWidth = MaxWidth.Medium, FullWidth = true, CloseButton = true };
+
+    private void OpenDialog(DialogOptions options, FormModel result)
+    {
+        constant.FormId = result.FormId;
+        constant.refno = result.JobFormRecord.RefNo;
+        DialogService.Show<ViewJobDetailsDialog>("Custom Options Dialog", options);
+    }
+
+
+
+    private void OpenDialog3(FormModel result)
+    {
+
+        constant.FormId = result.JobFormRecord.Id;
+        DialogService.Show<IpadQueueDialog3>("Custom Options Dialog");
+    }
+
+
+    public int ID = 0;
+
+
+
+    private async Task UpdateJobToIPAD25(FormModel result)
+    {
+        DateTime utcTime = DateTime.UtcNow;
+        TimeZoneInfo londonTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Europe/London");
+        londonTime = TimeZoneInfo.ConvertTimeFromUtc(utcTime, londonTimeZone);
+        using (var httpClient = new HttpClient())
+            try
+            {
+
+                var Data = new
+                {
+                    Id = result.JobFormRecord.Id
+
+                };
+
+
+                string jsonData = JsonConvert.SerializeObject(Data);
+                var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+
+                var response = await httpClient.PostAsync(constant.UpdateJobToIPAD25, content);
+
+                if (response.IsSuccessStatusCode)
+                {
+
+                    var message = await response.Content.ReadAsStringAsync();
+                    // DeleteRecordClass.DeleteRecordInFormJob(ID, 8);
+                    //AddRecordClass.AddRecordInFormJob(ID, 17);
+                    AuditClasss.Audit(result.JobFormRecord.Id, constant.LoginUserName, londonTime, "Book IPAD");
+                    Snackbar.Add(message, Severity.Success);
+
+                    var obj = formList.FirstOrDefault(x => x.FormId == result.FormId);
+                    formList.Remove(obj);
+                    // NavigationManager.NavigateTo("/IPADQueue", true);
+                    StateHasChanged();
+                }
+                else
+                {
+                    var errorMessage = await response.Content.ReadAsStringAsync();
+                    Snackbar.Add(errorMessage, Severity.Error);
+
+
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+
+                Snackbar.Add(ex.Message, Severity.Error);
+            }
+    }
+
+
+
+
+
+
+
+    private List<FormModel> formList = new List<FormModel>();
+
+
+
+    public class JobFormRecord
+    {
+        public int Id { get; set; }
+        public string RefNo { get; set; }
+
+        public string AddressLine1 { get; set; }
+
+        public string SurveyName { get; set; }
+
+        public int Status { get; set; }
+
+    }
+
+    public class FormModel
+    {
+        public int Id { get; set; }
+        public int FormId { get; set; }
+        public int Status { get; set; }
+        public JobFormRecord JobFormRecord { get; set; }
+    }
+
+
+    protected override void OnInitialized()
+    {
+
+        Form1BySat44();
+    }
+
+    private async Task Form1BySat44()
+    {
+        using (var httpClient = new HttpClient())
+            try
+            {
+                var response = await httpClient.GetAsync(constant.Form1BySat44);
+                if (response.IsSuccessStatusCode)
+                {
+
+                    loading = false;
+                    var jsonString = await response.Content.ReadAsStringAsync();
+                    formList = JsonConvert.DeserializeObject<List<FormModel>>(jsonString).ToList();
+
+                    StateHasChanged();
+                }
+                else
+                {
+                    loading = false;
+                    var errorMessage = await response.Content.ReadAsStringAsync();
+                    Snackbar.Add(errorMessage, Severity.Error);
+                }
+
+            }
+            catch (Exception e)
+            {
+                loading = false;
+                Snackbar.Add("Try Catch Error: " + e, Severity.Error);
+            }
+
+    }
+    DateTime londonTime ;
+
+
+}

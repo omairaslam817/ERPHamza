@@ -1,0 +1,189 @@
+﻿@inherits LayoutComponentBase
+@inject AuthenticationStateProvider authStateProvider
+@using ERPHamza.Data.Authentication
+@using Microsoft.AspNetCore.Components.Authorization
+@using ERPHamza.Data
+@inject NavigationManager NavigationManager
+@inject ISnackbar Snackbar
+<MudThemeProvider />
+<MudDialogProvider 
+                   
+                   CloseButton="true"
+                   DisableBackdropClick="true"
+                   
+                   
+                   CloseOnEscapeKey="true" />
+<MudSnackbarProvider />
+
+<MudLayout>
+    <MudAppBar>
+        
+        <AuthorizeView>
+            <Authorized>
+                <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+                <MudButton OnClick="ShowConfirmation" Variant="Variant.Outlined" Color="Color.Dark" StartIcon="@Icons.Material.Filled.Search">Search</MudButton>
+                    <MudSpacer />
+                
+                &nbsp;
+                <MudText Style="color:black">@constant.LoginUserName</MudText> &nbsp;
+                <MudButton  OnClick="logout" href="javascript:void(0)"> Logout</MudButton>
+            
+            </Authorized>
+            <NotAuthorized>
+                <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+                ERP 
+                    <MudButton Style="margin-left:80%;"  href="/"> Login</MudButton>
+                @* <a Style="margin-left:80%; border:solid;" >Login</a> *@
+             </NotAuthorized>
+        </AuthorizeView>
+          
+    </MudAppBar>
+        <MudDrawer @bind-Open="@_drawerOpen">
+        <MyNavMenu />
+           
+    </MudDrawer>
+    <MudMainContent>
+        @Body
+    </MudMainContent>
+</MudLayout>
+
+
+<MudOverlay @bind-Visible="PopUpConfirm" DarkBackground="true" AutoClose="false">
+    <MudPopover Style="width:900px" Open="@PopUpConfirm" AnchorOrigin="Origin.CenterCenter" TransformOrigin="Origin.CenterCenter">
+        <MudCard>
+            <MudCardContent>
+                <MudText Typo="Typo.h6">Search</MudText>
+
+                <MudAutocomplete AutoFocus="true" Style="color:black" T="string"
+                                 Label="Search by RefNo or Address"
+                                 @bind-Value="selectedSearchItem"
+                                 SearchFunc="SearchItems"
+                                 ToStringFunc="@(item => item)"
+                                 CoerceText="true"
+                                 ResetValueOnEmptyText="true"
+                                 Clearable="true"
+                                 Dense="true">
+                </MudAutocomplete>
+
+
+            </MudCardContent>
+            <MudCardActions Style="justify-content:end">
+                <MudButton OnClick="closeConfirmation" Color="Color.Error">Cancel</MudButton>
+                <MudButton OnClick="OnGoButtonPressed" Color="Color.Success">Go</MudButton>
+            </MudCardActions>
+        </MudCard>
+    </MudPopover>
+</MudOverlay>
+
+
+
+@code{
+    private bool PopUpConfirm = false;
+    private List<SearchItem> items = new();
+    private Dictionary<string, int> searchItemDictionary = new();
+
+    public class SearchItem
+    {
+        public int Id { get; set; }
+        public string RefNo { get; set; }
+        public string AddressLine1 { get; set; }
+    }
+    private void ShowConfirmation() => PopUpConfirm = true;
+    private void closeConfirmation() => PopUpConfirm = false;
+
+    private string selectedSearchItem;
+    private Task<IEnumerable<string>> SearchItems(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return Task.FromResult<IEnumerable<string>>(Array.Empty<string>());
+
+        var result = searchItemDictionary.Keys
+            .Where(key => key.Contains(value, StringComparison.OrdinalIgnoreCase));
+
+        return Task.FromResult(result);
+    }
+    private async Task LoadSearchItems()
+    {
+        using (var httpClient = new HttpClient())
+        {
+            try
+            {
+                items = await httpClient.GetFromJsonAsync<List<SearchItem>>(constant.GetRefAddress);
+                // Populate dictionary for mapping display text to Id
+                searchItemDictionary = items.ToDictionary(
+                    item => $"{item.RefNo} - {item.AddressLine1}",
+                    item => item.Id);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error fetching data from API: " + ex.Message);
+            }
+        }
+    }
+    private void OnGoButtonPressed()
+    {
+        try
+        {
+            if (selectedSearchItem != null)
+            {
+                if (searchItemDictionary.TryGetValue(selectedSearchItem, out int selectedId))
+                {
+                    if (selectedId != 0)
+                    {
+                        constant.FormId = selectedId;
+                        NavigationManager.NavigateTo("/job", true);
+                    }
+
+
+
+                }
+            }
+            else
+            {
+                Snackbar.Add("Please select a search item", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+
+            Snackbar.Add("Error fetching data from API: " + ex.Message, Severity.Error);
+
+        }
+
+
+    }
+
+
+
+    protected override async void OnInitialized()
+    {
+        await LoadSearchItems();
+    }
+
+
+
+
+
+    bool _drawerOpen = true;
+
+    void DrawerToggle()
+    {
+        _drawerOpen = !_drawerOpen;
+    }
+
+    private async Task logout()
+    {
+        var customAuthStateProvider = (CustomAuthenticationStateProvider)authStateProvider;
+        await customAuthStateProvider.UpdateAuthenticationState(null);
+        NavigationManager.NavigateTo("/", true);
+    }
+}
+<style>
+    :root {
+       
+        --mud-palette-appbar-background:white;
+        --mud-palette-appbar-text:black;
+    }
+
+    
+</style>

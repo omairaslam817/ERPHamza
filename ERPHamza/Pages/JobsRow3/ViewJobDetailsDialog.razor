@@ -1,0 +1,717 @@
+﻿@using ERPHamza.Data
+@using System.Net.Http.Json
+@using System.Text;
+@using Newtonsoft.Json
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+<style>
+
+	/* Optional: You can add CSS to style the table */
+	.mud-dialog-content {
+		background: #F3F3F3;
+	}
+
+	.card {
+		box-shadow: 0 1rem 2rem hsl(0 0% 0% / 20%);
+		gap: 5vmin;
+		background: hsl(0 0% 100%);
+		color: hsl(200 50% 20%);
+		line-height: 1.5;
+		font-size: 1.5rem;
+		font-weight: 300;
+		width: 100%;
+		height: 35vmin;
+		display: flex;
+		border-radius: 1ch;
+		border: 1px solid hsl(0 0% 83%);
+		display: grid;
+		grid-auto-flow: column;
+	}
+
+
+
+	my {
+		block-size: 100%;
+		inline-size: 100%;
+		background: hsl(0 0% 85%);
+	}
+
+	.ex3 {
+		width: 100%;
+		overflow: auto;
+		height: 220px !important;
+	}
+</style>
+<MudDialog>
+	<TitleContent>
+		<MudText Typo="Typo.h6" style="color: black;">Job Details</MudText>
+	</TitleContent>
+	<DialogContent>
+
+		<MudCard>
+			<MudCardContent>
+				@if (isload)
+				{
+
+
+
+					<div style="display:flex; width:100%;">
+						<div style="width:70%; margin-top:20px; padding:10px;">
+							<table style="padding:20px; margin-bottom:20px;">
+								<tr>
+									<td style="font-size:large"><b>JOB DETAIL:</b></td>
+								</tr>
+								<tr>
+									<td>
+										<b>Lead Generator: </b>@foreach (var record in JobForm1Records)
+										{
+											@record.LeadGenerator
+										}
+									</td>
+
+								</tr>
+								<tr style="width:100%;">
+									<td style="width:30%">
+										<b>Surname: </b>
+										@foreach (var record in JobForm1Records)
+										{
+											@record.Surname
+										}
+									</td>
+									<td style="width:40%"></td>
+
+									<td style="width:30%">
+										<b>Forename: </b>
+										@foreach (var record in JobForm1Records)
+										{
+											@record.Forename
+										}
+									</td>
+								</tr>
+								<tr style="width:100%;">
+									<td style="width:30%">
+										<b>Date of Birth: </b>
+										@foreach (var record in JobForm1Records)
+										{
+											@record.DOB
+										}
+									</td>
+									<td style="width:40%"></td>
+
+									<td style="width:30%">
+										<b>Property Name or No: </b> @foreach (var record in JobForm1Records)
+										{
+											@record.PropertyNo
+										}
+									</td>
+								</tr>
+								<tr style="width:100%;">
+									<td style="width:30%">
+										<b>Address: </b>
+										@foreach (var record in JobForm1Records)
+										{
+											@record.AddressLine1
+										}
+									</td>
+									<td style="width:40%"></td>
+
+									<td style="width:30%">
+										<b>Town: </b>
+										@foreach (var record in JobForm1Records)
+										{
+											@record.Town
+										}
+									</td>
+								</tr>
+								<tr style="width:100%;">
+									<td style="width:30%"><b>County: </b> UK</td>
+									<td style="width:40%"></td>
+
+									<td style="width:30%">
+										<b>Postcode: </b>
+										@foreach (var record in JobForm1Records)
+										{
+											@record.Postcode
+										}
+									</td>
+								</tr>
+								<tr>
+									<td style="font-size:large"><b>SURVEY:</b></td>
+								</tr>
+								<tr style="width:100%;">
+									<td style="width:30%">
+										<b>Survyeor name: </b>
+										@foreach (var record in JobForm1Records)
+										{
+											@record.SurveyName
+										}
+									</td>
+									<td style="width:40%"></td>
+
+									<td style="width:30%">
+										<b>Tenure: </b>
+										@foreach (var record in JobForm1Records)
+										{
+											@record.Tenure
+										}
+									</td>
+								</tr>
+								<tr>
+									<td style="font-size:large"><b>EPR:</b></td>
+								</tr>
+								<tr style="width:100%;">
+									<td style="width:30%"><b>EPR Notes:</b></td>
+									<td style="width:40%"></td>
+
+									<td style="width:30%">
+										<b>Contribution: </b>
+										@foreach (var record in JobForm1Records)
+										{
+											@record.EprJobContrbText
+										}
+									</td>
+								</tr>
+								<tr>
+									<td style="font-size:large"><b>PAS INSTALLATION:</b></td>
+								</tr>
+								<tr style="width:100%;">
+									<td style="width:30%">
+										<b>PAS Installer: </b>
+										@foreach (var record in JobForm1Records)
+										{
+											@record.PassInstaName
+										}
+									</td>
+									<td style="width:40%">
+										<b>Time: </b>
+										@foreach (var record in JobForm1Records)
+										{
+											@record.PassInstaTime
+										}
+									</td>
+
+									<td style="width:30%">
+										<b>Date: </b>
+										@foreach (var record in JobForm1Records)
+										{
+											@record.PassInstaDate
+										}
+									</td>
+								</tr>
+
+								<tr>
+									<td style="font-size:large"><b>IPAD</b></td>
+								</tr>
+								<tr style="width:100%;">
+									<td style="width:30%">
+										<b>Retrofit Assessors: </b>
+										@foreach (var record in JobForm1Records)
+										{
+											@record.IpadQAccessorName
+										}
+									</td>
+									<td style="width:40%">
+										<b>Retrofit Coordinator: </b>
+										@foreach (var record in JobForm1Records)
+										{
+											@record.IpadQAccessorNameRcInst
+										}
+									</td>
+								</tr>
+
+								<tr>
+									<td style="font-size:large"><strong>External Wall Insallation:</strong></td>
+								</tr>
+								<tr style="width:100%;">
+									<td style="width:30%">
+										<b>PAS Installer: </b>
+										@foreach (var record in JobForm1Records)
+										{
+											@record.PassInstaName
+										}
+									</td>
+									<td style="width:40%">
+										<b>Time: </b>
+										@foreach (var record in JobForm1Records)
+										{
+											@record.PassInstaTime
+										}
+									</td>
+									<td style="width:40%">
+										<b>Date: </b>
+										@foreach (var record in JobForm1Records)
+										{
+											@record.PassInstaDate
+										}
+									</td>
+								</tr>
+
+								<tr>
+									<td style="font-size:large"><strong>RIR Installations</strong></td>
+								</tr>
+								<tr style="width:100%;">
+									<td style="width:30%">
+										<b>RIR Name: </b>
+										@foreach (var record in JobForm1Records)
+										{
+											@record.RIRName
+										}
+									</td>
+									<td style="width:40%">
+										<b>RIR Time: </b>
+										@foreach (var record in JobForm1Records)
+										{
+											@record.RIRTime
+										}
+									</td>
+									<td style="width:40%">
+										<b>RIR Date: </b>
+										@foreach (var record in JobForm1Records)
+										{
+											@record.RIRDate
+										}
+									</td>
+								</tr>
+
+								<tr>
+									<td style="font-size:large"><strong>IWI Installations</strong></td>
+								</tr>
+								<tr style="width:100%;">
+									<td style="width:30%">
+										<b>IWI Name: </b>
+										@foreach (var record in JobForm1Records)
+										{
+											@record.IWIName
+										}
+									</td>
+									<td style="width:40%">
+										<b>IWI Time: </b>
+										@foreach (var record in JobForm1Records)
+										{
+											@record.IWITime
+										}
+									</td>
+									<td style="width:40%">
+										<b>IWI Date: </b>
+										@foreach (var record in JobForm1Records)
+										{
+											@record.IWIDate
+										}
+									</td>
+								</tr>
+
+								<tr>
+									<td style="font-size:large"><strong>Boiler Installations</strong></td>
+								</tr>
+								<tr style="width:100%;">
+									<td style="width:30%">
+										<b>Boiler Name: </b>
+										@foreach (var record in JobForm1Records)
+										{
+											@record.BoilerName
+										}
+									</td>
+									<td style="width:40%">
+										<b>Boiler Time: </b>
+										@foreach (var record in JobForm1Records)
+										{
+											@record.BoilerName
+										}
+									</td>
+									<td style="width:40%">
+										<b>Boiler Date: </b>
+										@foreach (var record in JobForm1Records)
+										{
+											@record.BoilerDate
+										}
+									</td>
+								</tr>
+
+								<tr>
+									<td style="font-size:large"><strong>HC Installations</strong></td>
+								</tr>
+								<tr style="width:100%;">
+									<td style="width:30%">
+										<b>HC Name: </b>
+										@foreach (var record in JobForm1Records)
+										{
+											@record.HCName
+										}
+									</td>
+									<td style="width:40%">
+										<b>HC Time: </b>
+										@foreach (var record in JobForm1Records)
+										{
+											@record.HCTime
+										}
+									</td>
+									<td style="width:40%">
+										<b>HC Date: </b>
+										@foreach (var record in JobForm1Records)
+										{
+											@record.HCDate
+										}
+									</td>
+								</tr>
+
+								<tr>
+									<td style="font-size:large"><strong>Solar PV Installations</strong></td>
+								</tr>
+								<tr style="width:100%;">
+									<td style="width:30%">
+										<b>Solar PV Name: </b>
+										@foreach (var record in JobForm1Records)
+										{
+											@record.SolarName
+										}
+									</td>
+									<td style="width:40%">
+										<b>Solar PV Time: </b>
+										@foreach (var record in JobForm1Records)
+										{
+											@record.SolarTime
+										}
+									</td>
+									<td style="width:40%">
+										<b>Solar PV Date: </b>
+										@foreach (var record in JobForm1Records)
+										{
+											@record.SolarDate
+										}
+									</td>
+								</tr>
+
+								<tr>
+									<td style="font-size:large"><strong>ASHP Installation</strong></td>
+								</tr>
+								<tr style="width:100%;">
+									<td style="width:30%">
+										<b>ASHP Name: </b>
+										@foreach (var record in JobForm1Records)
+										{
+											@record.AshipName
+										}
+									</td>
+									<td style="width:40%">
+										<b>ASHP Time: </b>
+										@foreach (var record in JobForm1Records)
+										{
+											@record.AshipTime
+										}
+									</td>
+									<td style="width:40%">
+										<b>ASHP Date: </b>
+										@foreach (var record in JobForm1Records)
+										{
+											@record.AshipDate
+										}
+									</td>
+								</tr>
+
+								<tr>
+									<td style="font-size:large"><strong>RC Instructed</strong></td>
+								</tr>
+								<tr style="width:100%;">
+									<td style="width:30%">
+										<b>Side Note: </b>
+										@foreach (var record in JobForm1Records)
+										{
+											@record.RcInstructSideNote
+										}
+									</td>
+									<td style="width:40%">
+										<b>Rc Instruct Date: </b>
+										@foreach (var record in JobForm1Records)
+										{
+											@record.RcInstructSideDate
+										}
+									</td>
+									<td style="width:40%">
+										<b>ASHP Date: </b>
+										@foreach (var record in JobForm1Records)
+										{
+											@record.AshipDate
+										}
+									</td>
+								</tr>
+
+
+
+							</table>
+
+
+
+
+
+						</div>
+						<div style="width:30%; background-color:white; padding:25px;border-radius:25px;box-shadow: 1px 1px 30px 1px #888888;">
+							<div>
+								<h3>
+									JOB NOTE
+									<MudIconButton OnClick="OpenOverlayPopup" Icon="@Icons.Material.Filled.Edit" aria-label="delete"></MudIconButton>
+								</h3>
+								<hr />
+								<h6>
+									@foreach (var record in JobForm1Records)
+									{
+										@record.JobNote
+									}
+								</h6>
+
+
+								<hr style="border:2px black  solid;" />
+								<h3>
+									History
+								</h3>
+								<ul>
+									@foreach (var record in AuditRecords)
+									{
+										<li>
+											@record.Action By: @record.ActionBy At: @record.ADate
+										</li>
+									}
+								</ul>
+
+
+
+
+
+
+							</div>
+						</div>
+					</div>
+				}
+			</MudCardContent>
+		</MudCard>
+
+	</DialogContent>
+</MudDialog>
+
+<MudOverlay @bind-Visible="MudOverlayPopup" DarkBackground="false" AutoClose="false">
+	<MudPopover TransformOrigin="Origin.CenterCenter" AnchorOrigin="Origin.BottomCenter" Open="@MudOverlayPopup">
+		<MudCard Class="ex3">
+
+			<MudCardHeader>
+				<CardHeaderContent>
+					<MudText Typo="Typo.h6">
+						Add Job Note &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					</MudText>
+
+				</CardHeaderContent>
+				<CardHeaderActions>
+					<MudIconButton OnClick="CloseOverlayPopup" Icon="@Icons.Material.Filled.Close" Color="Color.Default" />
+				</CardHeaderActions>
+			</MudCardHeader>
+
+			<MudContainer>
+
+
+				<MudTextField T="string" Lines="3" Label="Job Note" Variant="Variant.Text" @bind-Value="model.JobNote" />
+
+
+			</MudContainer>
+
+			<MudCardActions Style="justify-content:end">
+				<MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="CloseOverlayPopup">Cancel</MudButton>
+				&nbsp;<MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="SubmitJobNote">Save</MudButton>
+			</MudCardActions>
+		</MudCard>
+
+	</MudPopover>
+</MudOverlay>
+
+@code{
+	bool MudOverlayPopup = false;
+	public void OpenOverlayPopup()
+	{
+
+		MudOverlayPopup = true;
+		StateHasChanged();
+	}
+	public void CloseOverlayPopup()
+	{
+		Cancel();
+		MudOverlayPopup = false;
+		StateHasChanged();
+	}
+	private async Task SubmitJobNote()
+	{
+		var data = new
+		{
+			Id = constant.FormId,
+			jobNote = model.JobNote
+
+		};
+
+
+		try
+		{
+			using var httpClient = new HttpClient();
+			string jsonData = JsonConvert.SerializeObject(data);
+			var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+			var response = await httpClient.PostAsync(constant.UpdateJobNote, content);
+
+			if (response.IsSuccessStatusCode)
+			{
+
+				MudOverlayPopup = false;
+				StateHasChanged();
+				Snackbar.Add("Note Added Successfully.", Severity.Success);
+
+			}
+			else
+			{
+
+				var errorMessage = await response.Content.ReadAsStringAsync();
+				Snackbar.Add(errorMessage, Severity.Error);
+			}
+		}
+		catch (Exception e)
+		{
+			Snackbar.Add("Error: Call To Developer", Severity.Error);
+		}
+
+
+	}
+
+	public bool isload = false;
+	[CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+	void Submit() => MudDialog.Close(DialogResult.Ok(true));
+	void Cancel() => MudDialog.Cancel();
+	JobForm1 model = new JobForm1();
+	private List<JobForm1> JobForm1Records { get; set; }
+	private List<AuditRecord> AuditRecords { get; set; }
+	private List<FromStatusRecord> FromStatusRecords { get; set; }
+	public class AuditRecord
+	{
+		public int Id { get; set; }
+		public int FormOrId { get; set; }
+		public string ActionBy { get; set; }
+		public DateTime ADate { get; set; }
+		public string Action { get; set; }
+
+	}
+
+	public class FromStatusRecord
+	{
+		public int Id { get; set; }
+		public int FormId { get; set; }
+		public int Status { get; set; }
+
+
+	}
+
+	public class JobForm1
+	{
+		public int Id { get; set; }
+		public string RefNo { get; set; }
+		public string LeadGenerator { get; set; }
+		public string Scheme { get; set; }
+		public string Surname { get; set; }
+		public string Forename { get; set; }
+		public string DOB { get; set; }
+		public string PropertyNo { get; set; }
+		public string AddressLine1 { get; set; }
+		public string Town { get; set; }
+		public string Postcode { get; set; }
+		public string SurveyName { get; set; }
+		public string SurveyDate { get; set; }
+		public string SurveyTime { get; set; }
+		public string Tenure { get; set; }
+		public int Status { get; set; }
+		public string CreateBy { get; set; }
+		public DateTime? CDate { get; set; }
+		public string PassInstaName { get; set; }
+		public DateTime? PassInstaDate { get; set; }
+		public string PassInstaTime { get; set; }
+		public string LoftName { get; set; }
+		public DateTime? LoftDate { get; set; }
+		public string LoftTime { get; set; }
+		public string RIRName { get; set; }
+		public DateTime? RIRDate { get; set; }
+		public string RIRTime { get; set; }
+		public string EWIName { get; set; }
+		public DateTime? EWIDate { get; set; }
+		public string EWITime { get; set; }
+		public string IWIName { get; set; }
+		public DateTime? IWIDate { get; set; }
+		public string IWITime { get; set; }
+		public string BoilerName { get; set; }
+		public DateTime? BoilerDate { get; set; }
+		public string BoilerTime { get; set; }
+		public string HCName { get; set; }
+		public DateTime? HCDate { get; set; }
+		public string HCTime { get; set; }
+		public string SolarName { get; set; }
+		public DateTime? SolarDate { get; set; }
+		public string SolarTime { get; set; }
+		public string AshipName { get; set; }
+		public DateTime? AshipDate { get; set; }
+		public string AshipTime { get; set; }
+		public string FunderName { get; set; }
+		public DateTime? FunderDate { get; set; }
+		public string FunderTime { get; set; }
+		public string IpadQAccessorName { get; set; }
+		public string IpadQAccessorNameRcInst { get; set; }
+		public string EprReportText { get; set; }
+		public string EprJobContrbText { get; set; }
+		public string RcInstructSideNote { get; set; }
+		public string RcInstructSideDate { get; set; }
+		public string FunderQText { get; set; }
+		public string JobNote { get; set; }
+
+
+
+
+
+	}
+	protected override async void OnInitialized()
+	{
+
+
+		await LoadForm1Data();
+	}
+	private async Task LoadForm1Data()
+	{
+		using (var httpClient = new HttpClient())
+			try
+			{
+				var data = new
+				{
+
+					Id = constant.FormId
+				};
+				string jsonData = JsonConvert.SerializeObject(data);
+				var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+				var response = await httpClient.PostAsync(constant.FindByRefNo2, content);
+				if (response.IsSuccessStatusCode)
+				{
+
+					var responseContent = await response.Content.ReadAsStringAsync();
+					var form1 = JsonConvert.DeserializeObject<dynamic>(responseContent);
+					JobForm1Records = JsonConvert.DeserializeObject<List<JobForm1>>(form1.JobForm1Records.ToString());
+					AuditRecords = JsonConvert.DeserializeObject<List<AuditRecord>>(form1.AuditRecords.ToString());
+					FromStatusRecords = JsonConvert.DeserializeObject<List<FromStatusRecord>>(form1.FromStatusRecords.ToString());
+					isload = true;
+					StateHasChanged();
+				}
+				else
+				{
+
+					var errorMessage = await response.Content.ReadAsStringAsync();
+					Snackbar.Add(errorMessage, Severity.Error);
+				}
+
+			}
+			catch (Exception e)
+			{
+
+				Snackbar.Add("Try Catch Error: " + e, Severity.Error);
+			}
+
+	}
+
+
+}

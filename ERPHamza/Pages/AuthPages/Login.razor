@@ -1,0 +1,299 @@
+﻿@page "/"
+@inject IHttpContextAccessor httpContextAccessor
+@inject UserAccountService userAcountService
+@inject AuthenticationStateProvider authStateProvider
+@inject NavigationManager NavigationManager
+@inject ISnackbar Snackbar
+@* @inject Blazored.SessionStorage.ISessionStorageService _sessionStorage *@
+@using ERPHamza.Data
+@using System.Security.Cryptography;
+@using ERPHamza.Data.Authentication
+@using Newtonsoft.Json
+@using Newtonsoft.Json.Linq
+@using System.Text
+@using System.Net.Http
+@using System.Net.Http.Json
+@using System.Threading.Tasks
+@using MudBlazor
+@inject Blazored.LocalStorage.ILocalStorageService _localStorage
+<AuthorizeView>
+    
+        @{NavigationManager.NavigateTo("/index");}
+   
+</AuthorizeView>
+
+@* <AuthorizeView>
+    <NotAuthorized>
+
+        @{
+            NavigationManager.NavigateTo("/index");
+        }
+    </NotAuthorized>
+</AuthorizeView> *@
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>ERP - login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta content="Premium Multipurpose Admin & Dashboard Template" name="description" />
+    <meta content="" name="author" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <!-- App favicon -->
+    <!-- App css -->
+
+    <style>
+        .mud-appbar .mud-toolbar-appbar {
+            display: none;
+        }
+
+        .mud-drawer .mud-drawer-content {
+            display: none;
+        }
+
+        .mud-drawer.mud-drawer-responsive, .mud-drawer.mud-drawer-persistent {
+            display: none;
+        }
+    </style>
+</head>
+
+<body class="account-body accountbg">
+
+    <!-- Log In page -->
+    <div class="container" style="margin-top:-90px; margin-left:15%; justify-content: center; ">
+        <div class="row vh-100 ">
+
+            <div class="col-6 align-self-center">
+                <div class="auth-page">
+                    <div class="card auth-card shadow-lg">
+                        <div class="card-body">
+                            <div class="px-3">
+                                <div class="auth-logo-box">
+                                    @* <a href="../dashboard/analytics-index.html" class="logo logo-admin"><img src="../assets/images/logo-sm.png" height="55" alt="logo" class="auth-logo"></a> *@
+                                </div><!--end auth-logo-box-->
+
+                                <div class="text-center auth-logo-text">
+                                    <img src="https://energysaviour.software/bgLogo.png" width="100%" height="88" />
+                                   @*  <h4 class="mt-0 mb-3 mt-5">Let's Get Started ERP</h4> *@
+
+                                </div> <!--end auth-logo-text-->
+
+
+                                <form class="form-horizontal auth-form my-4" action="index.html">
+
+                                    <div class="form-group">
+                                        <label for="username">Email</label>
+                                        <div class="input-group mb-3">
+                                            <span class="auth-form-icon">
+                                                <i class="dripicons-user"></i>
+                                            </span>
+                                            <input @bind="model.Email" type="text" class="form-control" id="email" placeholder="Enter email">
+                                        </div>
+                                    </div><!--end form-group-->
+
+                                    <div class="form-group">
+                                        <label for="userpassword">Password</label>
+                                        <div class="input-group mb-3">
+                                            <span class="auth-form-icon">
+                                                <i class="dripicons-lock"></i>
+                                            </span>
+
+                                            <input @bind="@model.Password" type="password" class="form-control" id="userpassword" placeholder="Enter password">
+                                        </div>
+                                    </div><!--end form-group-->
+
+
+                                    <div class="form-group  row">
+                                        <div class="col-12">
+                                            @*  <MudButton  Variant="Variant.Filled" Color="Color.Primary">Log In <i class="fas fa-sign-in-alt ml-1"></i></MudButton>  *@
+                                            @*  <button @onclick="Authenticate" class="btn btn-gradient-primary btn-round btn-block waves-effect waves-light" type="button">Log In <i class="fas fa-sign-in-alt ml-1"></i></button> *@
+
+                                            <MudButton Disabled="@_processing" @onclick="Authenticate" Variant="Variant.Filled" Color="Color.Primary" Style="width:100%;">
+                                                @if (_processing)
+                                                {
+                                                    <img src="macGif.gif" alt="Girl in a jacket" width="30" height="30">
+                                                }
+                                                else
+                                                {
+                                                    <MudText>Log In <i class="fas fa-sign-in-alt ml-1"></i></MudText>
+                                                }
+                                            </MudButton>
+
+
+
+
+                                        </div><!--end col-->
+                                    </div> <!--end form-group-->
+                                </form><!--end form-->
+                            </div><!--end /div-->
+
+
+                        </div><!--end card-body-->
+                    </div><!--end card-->
+
+                </div><!--end auth-page-->
+            </div><!--end col-->
+
+        </div>
+    </div>
+  
+    
+
+
+</body>
+
+</html>
+@code{
+
+
+    LoginResponse model = new LoginResponse();
+
+    public class LoginResponse
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Password { get; set; }
+        public string Email { get; set; }
+        public string Role { get; set; }
+
+    }
+    private bool _processing = false;
+
+    private HttpClient httpClient = new HttpClient();
+    private async Task Authenticate()
+    {
+
+        try
+        {
+            Dateapi();
+            HashPassword(model.Password);
+            _processing = true;
+         
+           
+
+            var data = new
+            {
+
+                Email = model.Email,
+                Password = hashedPassword
+
+       
+            };
+
+            string jsonData = JsonConvert.SerializeObject(data);
+            var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+
+            var response = await httpClient.PostAsync(constant.Login, content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                
+                Snackbar.Add("Login Success", Severity.Success);
+                var responseContent = await response.Content.ReadAsStringAsync();
+
+                // Deserialize the response content into a LoginResponse object
+                var loginResponse = JsonConvert.DeserializeObject<LoginResponse>(responseContent);
+
+
+
+
+                await _localStorage.SetItemAsync("username", loginResponse.Name);
+                await _localStorage.SetItemAsync("role", loginResponse.Role);
+                await _localStorage.SetItemAsync("email", loginResponse.Email);
+                await _localStorage.SetItemAsync("id", loginResponse.Id);
+
+                constant.LoginUserName = await _localStorage.GetItemAsync<string>("username");
+                constant.LoginUserId = await _localStorage.GetItemAsync<int>("id");
+                constant.UserRole = await _localStorage.GetItemAsync<string>("role");
+
+
+
+                var responseEmail = loginResponse?.Email;
+                var responseRole = loginResponse?.Role;
+
+                var responseName = loginResponse?.Name;
+
+
+
+
+              //  constant.LoginUserName = responseName;
+                //var responseId = loginResponse.Id;
+               // constant.LoginUserId = responseId;
+                //constant.UserRole = responseRole;
+
+                var customAuthStateProvider = (CustomAuthenticationStateProvider)authStateProvider;
+                await customAuthStateProvider.UpdateAuthenticationState(new UserSession
+                    {
+                        Email = responseEmail,
+                        UserName = responseName,
+                        Role = responseRole,
+                        //ID = responseId
+                    });
+
+                await Task.Delay(100);  // Small delay to ensure session data is set
+                NavigationManager.NavigateTo("/index", forceLoad: true);
+
+            }
+            else
+            {
+                _processing = false;
+                // Handle an error response
+                Snackbar.Add("Check Email or Password", Severity.Error);
+               
+            }
+
+        }
+        catch (Exception ex)
+        {
+            _processing = false;
+            Console.WriteLine("An error occurred: " + ex.Message);
+        }
+    }
+
+
+    private string hashedPassword = "";
+
+    private void HashPassword(string password)
+    {
+        using (SHA256 sha256 = SHA256.Create())
+        {
+            byte[] hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+            StringBuilder builder = new StringBuilder();
+
+            foreach (byte b in hashedBytes)
+            {
+                builder.Append(b.ToString("x2")); // Convert the byte to a hexadecimal string
+            }
+
+            hashedPassword = builder.ToString();
+        }
+    }
+    private async Task Dateapi()
+    {
+        var response = await httpClient.GetAsync(constant.DateApi);
+        var responseContent = await response.Content.ReadAsStringAsync();
+        JObject jsonObject = JObject.Parse(responseContent);
+
+        string time = (string)jsonObject["time"];
+        int day = (int)jsonObject["day"];
+        int month = (int)jsonObject["month"];
+        int year = (int)jsonObject["year"];
+        DateTime dateTime = new DateTime(year, month, day);
+        string formattedDate = dateTime.ToString("dd.MM.yyyy");
+
+        constant.DateAndTime = formattedDate + time;
+
+        constant.DateOnly = dateTime;
+
+
+
+    }
+
+
+
+}

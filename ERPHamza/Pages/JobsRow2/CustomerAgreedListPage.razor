@@ -1,0 +1,243 @@
+﻿@page "/CustomerAgreedListPage"
+@using System.Text.RegularExpressions
+@using System.ComponentModel.DataAnnotations
+@using ERPHamza.Data
+@using System.Net.Http.Json
+@using System.Text;
+@using Newtonsoft.Json
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+@inject IDialogService DialogService
+
+
+<style>
+    .mud-appbar .mud-toolbar-appbar {
+        background-color: #FFFFFF;
+    }
+
+
+
+    .mud-appbar .mud-toolbar-appbar {
+        background-color: #FFFFFF;
+    }
+
+</style>
+
+
+
+<AuthorizeView>
+    <Authorized>
+
+
+<div class="card-header mt-2">
+    <h5>Customer Agreed</h5>
+</div>
+@if (loading)
+{
+    <center style="margin-top:5%;">
+        <img src="macGif.gif" alt="Loading" width="30" height="30">
+    </center>
+
+}
+else
+{
+    <table class="table mt-8 mr-4 ml-4">
+        <thead>
+            <tr>
+                <th class="col-1">#</th>
+                <th class="col-3">RefNo</th>
+                <th class="col-3">Address</th>
+                <th class="col-5" style="text-align: center;">Action</th>
+            </tr>
+        </thead>
+
+        @if (formList.Count > 0)
+        {
+            <tbody>
+                @foreach (var result in formList)
+                {
+
+                    <tr>
+                        <th scope="row">@(formList.IndexOf(result) + 1)</th>
+                        <td>@result.JobFormRecord.RefNo</td>
+                        <td>@result.JobFormRecord.AddressLine1</td>
+                        <td>
+                             <MudButton OnClick="@((e) => GoToJob(result))" Variant="Variant.Outlined" Color="Color.Success" style="margin-right:50px">Job Details</MudButton>
+
+                            <MudButton OnClick="@((e) => OpenDialog2(maxWidth,result))" Variant="Variant.Outlined" Color="Color.Success">Start installation</MudButton>
+                           @*  <MudButton OnClick="ShowConfirmationTrackRecord" Variant="Variant.Outlined" Color="Color.Success">View Measures</MudButton> *@
+                        </td>
+                    </tr>
+
+                }
+            </tbody>
+        }
+
+
+
+
+    </table>
+    @if (formList.Count == 0)
+    {
+        <img class="center" style="height:300px;width:300px; display: block; margin-left: auto;   margin-right: auto;" src="nodata.gif">
+    }
+
+    <MudOverlay @bind-Visible="PopUpTrackRecord" DarkBackground="true" AutoClose="false">
+        <MudPopover Open="@PopUpTrackRecord" AnchorOrigin="Origin.CenterCenter" TransformOrigin="Origin.CenterCenter">
+
+            <MudCard>
+                <MudCardContent>
+                    <MudText Typo="Typo.h6">Avaiable Measure</MudText>
+                    <MudText Typo="Typo.body2">
+                        <div>
+                            @foreach (var record in TrackList)
+                            {
+                            <li>
+                                    @record.TrackRCInstStateName
+                            </li>
+                            }
+                        </div>
+                    </MudText>
+                </MudCardContent>
+                <MudCardActions Style="justify-content:end">
+                    <MudButton OnClick="closeConfirmationTrackRecord" Color="Color.Error">Close</MudButton>
+                </MudCardActions>
+            </MudCard>
+
+        </MudPopover>
+    </MudOverlay>
+
+
+
+}
+    </Authorized>
+    <NotAuthorized>
+        <MudAlert ShowCloseIcon="true" CloseIconClicked="Navi" Severity="Severity.Error" Variant="Variant.Filled">
+            <MudAlertTitle>Access Denied</MudAlertTitle>
+            <MudAlertDescription>You are not authorized to access this page. Please Login</MudAlertDescription>
+        </MudAlert>
+        </NotAuthorized>
+</AuthorizeView>
+@code{
+    public void GoToJob(FormModel result)
+    {
+        constant.FormId = result.JobFormRecord.Id;
+        NavigationManager.NavigateTo("/job", true);
+    }
+    public void Navi()
+    {
+        NavigationManager.NavigateTo("/", forceLoad: true);
+    }
+    private bool PopUpTrackRecord = false;
+
+    private void ShowConfirmationTrackRecord()
+    {
+        // constant.FormId = result.JobFormRecord.Id;
+        PopUpTrackRecord = true;
+
+
+    }
+    private void closeConfirmationTrackRecord()
+    {
+        // constant.FormId = 0;
+        PopUpTrackRecord = false;
+    }
+
+    DialogOptions maxWidth = new DialogOptions() { MaxWidth = MaxWidth.Medium, FullWidth = false, CloseButton = true };
+
+
+    private void OpenDialog(DialogOptions options, FormModel result)
+    {
+        constant.FormId = result.FormId;
+        constant.refno = result.JobFormRecord.RefNo;
+        DialogService.Show<ViewJobDetailsDialog>("Custom Options Dialog", options);
+    }
+    private void OpenDialog2(DialogOptions options, FormModel result)
+    {
+
+        constant.FormId = result.JobFormRecord.Id;
+        DialogService.Show<AvalMeasureCheckboxDialog>("Custom Options Dialog", maxWidth);
+    }
+
+    bool loading = true;
+
+    public int ID = 0;
+    public string refno = "";
+
+    private List<FormModel> formList = new List<FormModel>();
+    private List<TrackRecordModel> TrackList = new List<TrackRecordModel>();
+    public class JobFormRecord
+    {
+        public int Id { get; set; }
+        public string RefNo { get; set; }
+
+        public string AddressLine1 { get; set; }
+
+        public string SurveyName { get; set; }
+
+        public int Status { get; set; }
+
+    }
+
+    public class FormModel
+    {
+        public int Id { get; set; }
+        public int FormId { get; set; }
+        public int Status { get; set; }
+        public JobFormRecord JobFormRecord { get; set; }
+        public List<TrackRecordModel> TrackRecord { get; set; }
+    }
+    public class TrackRecordModel
+    {
+        public int TrackRCInstStateId { get; set; }
+        public string TrackRCInstStateName { get; set; }
+    }
+
+
+
+    protected override void OnInitialized()
+    {
+
+        // //base.OnInitialized();
+
+        Form1BySat6();
+    }
+
+    private async Task Form1BySat6()
+    {
+        using (var httpClient = new HttpClient())
+            try
+            {
+                var response = await httpClient.GetAsync(constant.Form1BySat6);
+                if (response.IsSuccessStatusCode)
+                {
+
+
+                    var jsonString = await response.Content.ReadAsStringAsync();
+                    formList = JsonConvert.DeserializeObject<List<FormModel>>(jsonString).ToList();
+                    //TrackList = formList[0].TrackRecord;
+                    loading = false;
+                    StateHasChanged();
+                }
+                else
+                {
+                    loading = false;
+                    var errorMessage = await response.Content.ReadAsStringAsync();
+                    Snackbar.Add(errorMessage, Severity.Error);
+                }
+
+            }
+            catch (Exception e)
+            {
+
+                Snackbar.Add("Try Catch Error: " + e, Severity.Error);
+            }
+
+    }
+
+    
+
+
+
+}
+

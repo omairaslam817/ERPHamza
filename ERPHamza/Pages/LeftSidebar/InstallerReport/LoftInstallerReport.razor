@@ -1,0 +1,242 @@
+﻿@page "/LoftInstallerReport"
+<PageTitle>Loft Installer Report</PageTitle>
+@using System.Text.RegularExpressions
+@using System.ComponentModel.DataAnnotations
+@using ERPHamza.Data
+@using System.Net.Http.Json
+@using System.Text;
+@using Newtonsoft.Json
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+@inject IDialogService DialogService
+<style>
+    .mud-appbar .mud-toolbar-appbar {
+        background-color: #FFFFFF;
+    }
+
+
+
+    .mud-appbar .mud-toolbar-appbar {
+        background-color: #FFFFFF;
+    }
+</style>
+
+
+<div class="card-header mt-2">
+    <h5>LOFT Installer Report</h5>
+</div>
+
+<AuthorizeView>
+    <Authorized>
+
+<div class=" ml-4 mt-4 col-xl-5" style="display:flex">
+    @if (tbmkloaded)
+    {
+        <MudSelect Variant="Variant.Outlined" Margin="Margin.Dense" Label="Loft Installer" @bind-Value="selectedLdGen">
+            <MudSelectItem T="string" Value="null" Label="Select Loft Installer" />
+            @foreach (var Generator in LdGenList)
+            {
+                <MudSelectItem T="string" Value="Generator" Label="@Generator" />
+            }
+        </MudSelect>
+        <div class="mt-1 ml-2">
+            <MudButton Disabled="@_processing" OnClick="FindByLeadGen" Variant="Variant.Filled" Color="Color.Primary">
+                @if (_processing)
+                {
+                    <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                    <MudText Class="ms-2">Searching...</MudText>
+                }
+                else
+                {
+                    <MudText>Search</MudText>
+                }
+            </MudButton>
+        </div>
+
+    }
+
+</div>
+
+
+@if (formList.Count > 0)
+{
+    <table class="table mt-8 mr-2 ml-2">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">RefNo</th>
+                <th scope="col">Address</th>
+                <th scope="col" style="text-align: center;">Action</th>
+            </tr>
+        </thead>
+
+        @if (formList.Count > 0)
+        {
+            <tbody>
+                @foreach (var result in formList)
+                {
+
+                    <tr>
+                        <th scope="row">@(formList.IndexOf(result) + 1)</th>
+                        <td>@result.RefNo</td>
+                        <td>@result.AddressLine1</td>
+                        <td>
+                            <MudButton OnClick="@((e) => OpenDialog(maxWidth,result))" Variant="Variant.Outlined" Color="Color.Success" style="margin-right:50px">Job Details</MudButton>
+                            <MudButton Variant="Variant.Filled" Color="Color.Success">Adv Report</MudButton>
+
+                        </td>
+                    </tr>
+
+                }
+            </tbody>
+        }
+
+
+
+
+    </table>
+
+}
+else
+{
+    <img class="center" style="height:300px;width:300px; display: block; margin-left: auto;   margin-right: auto;" src="nodata.gif">
+}
+
+    </Authorized>
+    <NotAuthorized>
+        <MudAlert ShowCloseIcon="true" CloseIconClicked="Navi" Severity="Severity.Error" Variant="Variant.Filled">
+            <MudAlertTitle>Access Denied</MudAlertTitle>
+            <MudAlertDescription>You are not authorized to access this page. Please Login</MudAlertDescription>
+        </MudAlert>
+        </NotAuthorized>
+</AuthorizeView>
+@code{public void GoToJob(FormModel result){constant.FormId = result.FormId;NavigationManager.NavigateTo("/job", true);}
+    public void Navi()
+    {
+        NavigationManager.NavigateTo("/", forceLoad: true);
+    }
+    private bool _processing = false;
+    bool tbmkloaded = false;
+    private string selectedLdGen;
+    private List<string> LdGenList;
+
+
+
+    bool loading = true;
+    DialogOptions maxWidth = new DialogOptions() { MaxWidth = MaxWidth.Medium, FullWidth = true, CloseButton = true };
+
+    private void OpenDialog(DialogOptions options, FormModel result)
+    {
+        constant.FormId = result.FormId;
+        constant.refno = result.RefNo;
+        DialogService.Show<ViewJobDetailsDialog>("Custom Options Dialog", options);
+    }
+
+
+
+
+
+
+    private List<FormModel> formList = new List<FormModel>();
+
+
+
+
+
+    public class FormModel
+    {
+        public int Id { get; set; }
+        public int FormId { get; set; }
+        public string AddressLine1 { get; set; }
+        public int Status { get; set; }
+        public string RefNo { get; set; }
+
+    }
+
+
+    protected override void OnInitialized()
+    {
+
+        //base.OnInitialized();
+        GetLOFTInstallerName();
+        // FindByLeadGen();
+    }
+
+
+
+    private async Task GetLOFTInstallerName()
+    {
+        var client = new HttpClient();
+        var response = await client.GetAsync(constant.GetLOFTInstallerName);
+        if (response.IsSuccessStatusCode)
+        {
+            var content = await response.Content.ReadAsStringAsync();
+            LdGenList = JsonConvert.DeserializeObject<List<string>>(content);
+
+            tbmkloaded = true;
+            StateHasChanged();
+        }
+        else
+        {
+            var errorMessage = await response.Content.ReadAsStringAsync();
+            Snackbar.Add(errorMessage, Severity.Error);
+        }
+    }
+
+
+    private async Task FindByLeadGen()
+    {
+        using (var httpClient = new HttpClient())
+            try
+            {
+                _processing = true;
+                if (selectedLdGen == null || selectedLdGen == "")
+                {
+
+                    Snackbar.Add("Name Required !", Severity.Error);
+                    _processing = false;
+                    return;
+                }
+
+                var Data = new
+                {
+
+                    LoftName = selectedLdGen
+
+
+                };
+                string jsonData = JsonConvert.SerializeObject(Data);
+                var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+
+
+                var response = await httpClient.PostAsync(constant.FindByLoftName, content);
+                if (response.IsSuccessStatusCode)
+                {
+
+                    _processing = false;
+                    var jsonString = await response.Content.ReadAsStringAsync();
+                    formList = JsonConvert.DeserializeObject<List<FormModel>>(jsonString).ToList();
+                    loading = false;
+                    StateHasChanged();
+                }
+                else
+                {
+                    _processing = false;
+                    loading = false;
+                    var errorMessage = await response.Content.ReadAsStringAsync();
+                    Snackbar.Add(errorMessage, Severity.Error);
+                }
+
+            }
+            catch (Exception e)
+            {
+                loading = false;
+                _processing = false;
+                Snackbar.Add("Try Catch Error: " + e, Severity.Error);
+            }
+
+    }
+
+
+}
+

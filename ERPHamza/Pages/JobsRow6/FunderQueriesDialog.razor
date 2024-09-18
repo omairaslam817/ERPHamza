@@ -1,0 +1,325 @@
+﻿@using ERPHamza.Data
+@using System.Net.Http.Json
+@using System.Text;
+@using ERPHamza.Data.MyClasses
+@using Newtonsoft.Json
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+@inject IDialogService DialogService
+<style>
+
+    /* Optional: You can add CSS to style the table */
+    .mud-dialog-content {
+        background: #F3F3F3;
+    }
+
+    .card {
+        box-shadow: 0 1rem 2rem hsl(0 0% 0% / 20%);
+        gap: 5vmin;
+        background: hsl(0 0% 100%);
+        color: hsl(200 50% 20%);
+        line-height: 1.5;
+        font-size: 1.5rem;
+        font-weight: 300;
+        width: 100%;
+        height: 35vmin;
+        display: flex;
+        border-radius: 1ch;
+        border: 1px solid hsl(0 0% 83%);
+        display: grid;
+        grid-auto-flow: column;
+    }
+
+
+
+    my {
+        block-size: 100%;
+        inline-size: 100%;
+        background: hsl(0 0% 85%);
+    }
+
+</style>
+<MudDialog TitleClass="mud-primary">
+    <TitleContent>
+        <MudText Typo="Typo.h6" style="color: white;">Funder Queries</MudText>
+    </TitleContent>
+    <DialogContent>
+
+        <MudCard>
+            <MudCardContent>
+                <MudTable Items="queries">
+                    <HeaderContent>
+                        <MudTh>Select</MudTh>
+                        <MudTh>Query</MudTh>
+                        <MudTh>Status</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd>
+                            <MudCheckBox Color="Color.Tertiary" @bind-Checked="@context.IsSelected" />
+                        </MudTd>
+                        <MudTd>@context.FunderText</MudTd>
+                        <MudTd>@context.Status</MudTd>
+                    </RowTemplate>
+                </MudTable>
+                @if (queries == null || !queries.Any())
+                {
+                    <p class="mt-2">Data not found</p>
+                }
+            </MudCardContent>
+            <center>
+                @if (queries.Count == bookedCount)
+                {
+
+                    <MudButton Class="ml-4 mb-4" Variant="Variant.Filled" Color="Color.Success" >Done</MudButton>
+                }
+                else
+                {
+                    //<MudButton Class="ml-4 mb-4" Variant="Variant.Filled" Color="Color.Success" OnClick="OnSubmit">Book</MudButton>
+                   <MudButton Class="ml-4 mb-4" Variant="Variant.Filled" Color="Color.Success" OnClick="@((e) => OpenDialog3(maxWidth))">Book</MudButton>
+                }
+               
+
+            </center>
+           
+        </MudCard>
+        
+
+
+
+
+    </DialogContent>
+    @*     <DialogActions>
+    <MudButton OnClick="Cancel">Cancel</MudButton>
+    <MudButton Color="Color.Primary" OnClick="Submit">Ok</MudButton>
+    </DialogActions> *@
+</MudDialog>
+
+
+@code{
+    
+    private bool _processing = false;
+    DateTime? date = DateTime.Today;
+
+
+
+
+
+
+
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    void Submit() => MudDialog.Close(DialogResult.Ok(true));
+    void Cancel() => MudDialog.Cancel();
+
+
+
+    DialogOptions maxWidth = new DialogOptions() { MaxWidth = MaxWidth.Medium, FullWidth = true, CloseButton = true };
+
+    private void OpenDialog3(DialogOptions options)
+    {
+        var dataToSend = queries
+    .Where(q => q.Status != "Awaiting") // Filter out records where Status is "Awaiting"
+    .Select(q => new { q.Id, q.Status })
+    .ToList();
+        if (dataToSend.Count <= 0)
+        {
+            Snackbar.Add("Select Query !", Severity.Error);
+            return;
+        }
+        // constant.FormId = result.JobFormRecord.Id;
+        DialogService.Show<FunderQDialog3>("Query done Dialog", options);
+    }
+
+
+    protected override async void OnInitialized()
+    {
+
+
+
+        await QueryLis();
+    }
+
+    public class Q
+    {
+        private bool isSelected;
+        public bool IsSelected
+        {
+            get => isSelected;
+            set
+            {
+                isSelected = value;
+                Status = isSelected ? "Booked" : "Awaiting";
+            }
+
+        }
+        public int Id { get; set; }
+        public string FunderText { get; set; }
+        public string Status { get; set; }
+        public string MemberType { get; set; }
+        public string Member { get; set; }
+        public string MTime { get; set; }
+        public string MDate { get; set; }
+
+
+    }
+
+
+    public int bookedCount = 0;
+
+    private List<Q> queries = new List<Q>();
+    private async Task QueryLis()
+    {
+        using (var httpClient = new HttpClient())
+        {
+            try
+            {
+                var Data = new
+                {
+                    FormNo = constant.FormId
+                };
+
+                string jsonData = JsonConvert.SerializeObject(Data);
+                var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+
+                var response = await httpClient.PostAsync(constant.GetFQList, content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var content2 = await response.Content.ReadAsStringAsync();
+                    //queries = JsonConvert.DeserializeObject<List<Q>>(content2);
+                    var tempQueries = JsonConvert.DeserializeObject<List<Q>>(content2);
+                    bookedCount = tempQueries.Count(q => q.Status == "Booked");
+                    queries = tempQueries.Select(q => new Q
+                        {
+                            Id = q.Id,
+                            FunderText = q.FunderText,
+                            MDate=q.MDate,
+                            MTime = q.MTime,
+                            MemberType = q.MemberType,
+                            Member = q.Member,
+                            Status = q.Status,
+                            IsSelected = q.Status == "Booked"
+                        }).ToList();
+                    
+                   
+                    StateHasChanged();
+                }
+                else
+                {
+                    var errorMessage = await response.Content.ReadAsStringAsync();
+                    Snackbar.Add(errorMessage, Severity.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add(ex.Message, Severity.Error);
+            }
+        }
+    }
+
+
+    private async Task OnSubmit()
+    {
+        //var dataToSend = queries.Select(q => new { q.Id, q.Status }).ToList(); //all records
+        var dataToSend = queries
+        .Where(q => q.Status != "Awaiting") // Filter out records where Status is "Awaiting"
+        .Select(q => new { q.Id, q.Status,q.MemberType,q.Member,q.MTime,q.MDate })
+        .ToList();
+
+
+
+        if (dataToSend.Count == 0)
+        {
+            Snackbar.Add("Select Query !", Severity.Error);
+            return;
+        }
+        using (var httpClient = new HttpClient())
+        {
+            try
+            {
+                string jsonData = JsonConvert.SerializeObject(dataToSend);
+                var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+
+                var response = await httpClient.PostAsync(constant.FQUpdateStatus, content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    MudDialog.Close(DialogResult.Ok(true));
+                    Snackbar.Add("Booked Successfully!", Severity.Success);
+                }
+                else
+                {
+                    var errorMessage = await response.Content.ReadAsStringAsync();
+                    Snackbar.Add(errorMessage, Severity.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add(ex.Message, Severity.Error);
+            }
+
+        }
+    }
+
+
+    // private async Task UpdateJobToPassInsta()
+
+    // {
+    //     _processing = true;
+    //     using (var httpClient = new HttpClient())
+    //         try
+    //         {
+
+    //             var Data = new
+    //             {
+    //                 Id = constant.FormId,
+    //                 RIRName = selectedMake,
+    //                 RIRDate = date,
+    //                 RIRTime = formattedTime
+
+
+    //             };
+
+
+    //             string jsonData = JsonConvert.SerializeObject(Data);
+    //             var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+
+    //             var response = await httpClient.PostAsync(constant.UpdateJobToRIR, content);
+
+    //             if (response.IsSuccessStatusCode)
+    //             {
+    //                 _processing = false;
+    //                 MudDialog.Close(DialogResult.Ok(true));
+    //                 var message = await response.Content.ReadAsStringAsync();
+    //                 StateHasChanged();
+
+    //                 // DeleteRecordClass.DeleteRecordInFormJob(constant.FormId, 10);
+    //                 //  AddRecordClass.AddRecordInFormJob(constant.FormId, 8);
+    //                 AuditClasss.Audit(constant.FormId, constant.LoginUserName, date2, "RIR Book Installation");
+
+    //                 NavigationManager.NavigateTo("/RIR", forceLoad: true);
+    //                 Snackbar.Add(message, Severity.Success);
+    //             }
+    //             else
+    //             {
+    //                 _processing = false;
+    //                 var errorMessage = await response.Content.ReadAsStringAsync();
+    //                 Snackbar.Add(errorMessage, Severity.Error);
+
+
+    //             }
+
+
+    //         }
+    //         catch (Exception ex)
+    //         {
+
+    //             _processing = false;
+    //             Snackbar.Add(ex.Message, Severity.Error);
+    //         }
+
+    // }
+
+
+
+}

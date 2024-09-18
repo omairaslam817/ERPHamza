@@ -1,0 +1,293 @@
+﻿@using ERPHamza.Data
+@using System.Net.Http.Json
+@using System.Text;
+@using ERPHamza.Data.MyClasses
+@using Newtonsoft.Json
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+<style>
+
+    /* Optional: You can add CSS to style the table */
+    .mud-dialog-content {
+        background: #F3F3F3;
+    }
+
+    .card {
+        box-shadow: 0 1rem 2rem hsl(0 0% 0% / 20%);
+        gap: 5vmin;
+        background: hsl(0 0% 100%);
+        color: hsl(200 50% 20%);
+        line-height: 1.5;
+        font-size: 1.5rem;
+        font-weight: 300;
+        width: 150%;
+        height: 35vmin;
+        display: flex;
+        border-radius: 1ch;
+        border: 1px solid hsl(0 0% 83%);
+        display: grid;
+        grid-auto-flow: column;
+    }
+
+
+
+    my {
+        block-size: 100%;
+        inline-size: 100%;
+        background: hsl(0 0% 85%);
+    }
+
+</style>
+<MudDialog TitleClass="mud-primary">
+    <TitleContent>
+        <MudText Typo="Typo.h6" style="color: white;">Available Measures</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudCard >
+            <MudCardContent>
+                
+                        <div style=" margin-bottom: 0px;display: flex; justify-content: space-between; align-items: center;">
+                            <span>PAS Installation</span>
+                            <MudCheckBox @bind-Value="Job1Checked" Color="Color.Tertiary" Disabled="true" />
+                        </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>Loft Installation</span>
+                    <MudCheckBox @bind-Value="Job2Checked" Color="Color.Tertiary" />
+                </div>
+             
+                        <div style=" margin-bottom: 0px;display: flex; justify-content: space-between; align-items: center;">
+                            <span>RIR Installation</span>
+                            <MudCheckBox @bind-Value="Job3Checked" Color="Color.Tertiary" />
+                        </div>
+                
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span>External Wall Insulation</span>
+                            <MudCheckBox @bind-Value="Job4Checked" Color="Color.Tertiary" />
+                        </div>
+                  
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span>Internal Wall Insulation</span>
+                            <MudCheckBox @bind-Value="Job5Checked" Color="Color.Tertiary" />
+                        </div>
+                   
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span>Boiler Installation</span>
+                            <MudCheckBox @bind-Value="Job6Checked" Color="Color.Tertiary" />
+                        </div>
+                   
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span>HC Installation</span>
+                            <MudCheckBox @bind-Value="Job7Checked" Color="Color.Tertiary" />
+                        </div>
+                  
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span>Solar Installation</span>
+                            <MudCheckBox @bind-Value="Job8Checked" Color="Color.Tertiary" />
+                        </div>
+                  
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span>ASHP Installation</span>
+                            <MudCheckBox @bind-Value="Job9Checked" Color="Color.Tertiary" />
+                        </div>
+
+                       
+                  
+                <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="@PrintSelectedJobs">Done</MudButton>
+            </MudCardContent>
+        </MudCard>
+    </DialogContent>
+</MudDialog>
+
+@code{
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    void Submit() => MudDialog.Close(DialogResult.Ok(true));
+    void Cancel() => MudDialog.Cancel();
+
+    protected override async void OnInitialized()
+    {
+        ////base.OnInitialized();
+        //await LoadForm1Data();
+
+    }
+
+    public bool Job1Checked { get; set; } = true;
+    public bool Job2Checked { get; set; } = false;
+    public bool Job3Checked { get; set; } = false;
+    public bool Job4Checked { get; set; } = false;
+    public bool Job5Checked { get; set; } = false;
+    public bool Job6Checked { get; set; } = false;
+    public bool Job7Checked { get; set; } = false;
+    public bool Job8Checked { get; set; } = false;
+    public bool Job9Checked { get; set; } = false;
+
+    private List<string> selectedJobs = new List<string>();
+    private List<string> selectedJobNames = new List<string>();
+    private List<string> selectedJobCurrentState = new List<string>();
+    // private List<(string Name, string Id)> selectedJobs = new List<(string Name, string Id)>();
+    public class PostDataDto
+    {
+        public List<string> SelectedJobs { get; set; }
+        public List<string> SelectedJobNames { get; set; }
+
+    }
+
+    private void UpdateSelectedJobs()
+    {
+        selectedJobNames.Clear();
+        selectedJobs.Clear();
+        selectedJobCurrentState.Clear();
+        if (Job1Checked)
+        {
+            selectedJobNames.Add("PAS");
+            selectedJobs.Add("7");
+        }
+        if (Job2Checked) 
+        { 
+            selectedJobNames.Add("LOFT");
+            selectedJobs.Add("9"); 
+        }
+        if (Job3Checked)
+        {
+            selectedJobNames.Add("RIR");
+            selectedJobs.Add("10");
+        }
+        if (Job4Checked) { 
+            selectedJobNames.Add("EWI");
+            selectedJobs.Add("11"); 
+        }
+        if (Job5Checked)
+        {
+            selectedJobNames.Add("IWI");
+            selectedJobs.Add("12");
+        }
+        if (Job6Checked)
+        {
+            selectedJobNames.Add("BOILER");
+            selectedJobs.Add("13");
+        }
+        if (Job7Checked)
+        {
+            selectedJobNames.Add("HC");
+            selectedJobs.Add("14");
+        }
+        if (Job8Checked)
+        {
+            selectedJobNames.Add("SOLAR");
+            selectedJobs.Add("15");
+        }
+        if (Job9Checked)
+        {
+            selectedJobNames.Add("ASHP");
+            selectedJobs.Add("16");
+        }
+    }
+
+    private void PrintSelectedJobs()
+    {
+        UpdateSelectedJobs();
+
+        UpdateMultiJobMove();
+        
+        UpdateMultiJobRcInst();
+
+
+    }
+    private void Ok()
+    {
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+    private async Task UpdateMultiJobMove()
+    {
+        using (var httpClient = new HttpClient())
+            try
+            {
+                // Assuming selectedJobs contains string representations of status IDs
+                List<int> statusIds = selectedJobs.Select(int.Parse).ToList();
+
+                var data = new
+                {
+                    FormNo = constant.FormId,
+                    StatusIds = statusIds
+                };
+
+                string jsonData = JsonConvert.SerializeObject(data);
+                var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+
+                var response = await httpClient.PostAsync(constant.AddMultipleRecordInFormJob, content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    // Handle success
+                    DeleteRecordClass.DeleteRecordInFormJob(constant.FormId, 6);
+                    var errorMessage = await response.Content.ReadAsStringAsync();
+                    Snackbar.Add(errorMessage, Severity.Success);
+                    Ok();
+                    NavigationManager.NavigateTo("/CustomerAgreedListPage", forceLoad: true);
+                }
+                else
+                {
+                    var errorMessage = await response.Content.ReadAsStringAsync();
+                    Snackbar.Add(errorMessage, Severity.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("An error occurred: " + ex.Message);
+                Snackbar.Add(ex.Message, Severity.Error);
+            }
+    }
+
+    private async Task UpdateMultiJobRcInst()
+    {
+        using (var httpClient = new HttpClient())
+            try
+            {
+                var postData = new PostDataDto
+                    {
+                        SelectedJobs = selectedJobs,
+                        SelectedJobNames = selectedJobNames
+                    };
+
+                var data = new
+                {
+                    FormNo = constant.FormId,
+                    SelectedJobs = postData.SelectedJobs,
+                    selectedJobNames = postData.SelectedJobNames
+                };
+
+                string jsonData = JsonConvert.SerializeObject(data);
+                var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+
+                var response = await httpClient.PostAsync(constant.PostTrackRCInstState, content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    // Handle success
+                    DeleteRecordClass.DeleteRecordInFormJob(constant.FormId, 6);
+                    UpdateBookedClass.UpdateBookedInstallStatus(constant.FormId, 7, "PAS");
+                    var errorMessage = await response.Content.ReadAsStringAsync();
+                    Snackbar.Add(errorMessage, Severity.Success);
+                    Ok();
+                    NavigationManager.NavigateTo("/CustomerAgreedListPage", forceLoad: true);
+                }
+                else
+                {
+                    var errorMessage = await response.Content.ReadAsStringAsync();
+                    Snackbar.Add(errorMessage, Severity.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("An error occurred: " + ex.Message);
+                Snackbar.Add(ex.Message, Severity.Error);
+            }
+    }
+
+
+
+
+
+
+
+}

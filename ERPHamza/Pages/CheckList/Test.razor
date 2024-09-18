@@ -1,0 +1,36 @@
+﻿@page "/Test2"
+@using System.Net.Http.Json
+@inject HttpClient Http
+@using MudBlazor
+@inject ISnackbar Snackbar
+                  
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@using Microsoft.AspNetCore.Components.Authorization
+
+@if (isLoading)
+{
+    <h5 class="SubHeading">Loading...</h5>  <!-- Or a spinner, etc. -->
+}
+else
+{
+    <AuthorizeView>
+        <Authorized>
+            <h5 class="SubHeading">Authorized Page Contents show only</h5>
+        </Authorized>
+        <NotAuthorized>
+            <h5 class="SubHeading">Not Authorized Page Contents show only</h5>
+        </NotAuthorized>
+    </AuthorizeView>
+}
+
+@code {
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        isLoading = false;  // Stop loading once authentication state is known
+    }
+}
+

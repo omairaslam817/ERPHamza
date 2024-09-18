@@ -1,0 +1,116 @@
+﻿@using ERPHamza.Data
+
+@using ERPHamza.Data
+@using System.Net.Http.Json
+@using System.Text;
+@using ERPHamza.Data.MyClasses
+@using Newtonsoft.Json
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+
+<MudDialog>
+    <DialogContent>
+        Are you sure you want to perform this action? <b>This process cannot be undo.</b>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit">Ok</MudButton>
+    </DialogActions>
+</MudDialog>
+@code{public void GoToJob(FormModel result){constant.FormId = result.JobFormRecord.Id;NavigationManager.NavigateTo("/job", true);}
+    private List<FormModel> formList = new List<FormModel>();
+
+
+
+    public class JobFormRecord
+    {
+        public int Id { get; set; }
+        public string RefNo { get; set; }
+
+        public string AddressLine1 { get; set; }
+
+        public string SurveyName { get; set; }
+
+        public int Status { get; set; }
+
+    }
+
+    public class FormModel
+    {
+        public int Id { get; set; }
+        public int FormId { get; set; }
+        public int Status { get; set; }
+        public JobFormRecord JobFormRecord { get; set; }
+    }
+    private void OpenDialog()
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+        // DialogService.Show<DialogUsageExample_Dialog>("Confirmation", options);
+    }
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    void Submit()
+    {
+        UpdateJobToAshp35();
+
+    }
+    void Cancel() => MudDialog.Cancel();
+
+    DateTime londonTime;
+    private async Task UpdateJobToAshp35()
+
+    {
+        DateTime utcTime = DateTime.UtcNow;
+        TimeZoneInfo londonTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Europe/London");
+        londonTime = TimeZoneInfo.ConvertTimeFromUtc(utcTime, londonTimeZone);
+
+        using (var httpClient = new HttpClient())
+            try
+            {
+
+                var Data = new
+                {
+                    Id = constant.FormId
+                };
+
+
+                string jsonData = JsonConvert.SerializeObject(Data);
+                var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+
+                var response = await httpClient.PostAsync(constant.UpdateJobToAshp35, content);
+
+                if (response.IsSuccessStatusCode)
+                {
+
+
+                    var message = await response.Content.ReadAsStringAsync();
+
+                    
+                    DeleteRecordClass.DeleteRecordInFormJob(constant.FormId, 40);
+                    AddRecordClass.AddRecordInFormJob(constant.FormId, 41);
+                    UpdateBookedClass.UpdateBookedInstallStatus(constant.FormId, 16, "ASHP");
+                    AuditClasss.Audit(constant.FormId, constant.LoginUserName, londonTime, "ASHP Installation Done");
+                    StateHasChanged();
+                    NavigationManager.NavigateTo("/ASHPBooking", forceLoad: true);
+                    Snackbar.Add(message, Severity.Success);
+                }
+                else
+                {
+
+                    var errorMessage = await response.Content.ReadAsStringAsync();
+                    Snackbar.Add(errorMessage, Severity.Error);
+
+
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+
+                Snackbar.Add(ex.Message, Severity.Error);
+            }
+
+    }
+
+}

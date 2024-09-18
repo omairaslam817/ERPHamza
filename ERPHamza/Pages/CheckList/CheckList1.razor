@@ -1,0 +1,442 @@
+﻿@page "/CheckList"
+@using ERPHamza.Data
+@inject NavigationManager NavigationManager
+<PageTitle>Check List</PageTitle>
+<style>
+    .mud-form-row {
+        display: flex;
+        align-items: center; /* Align items vertically center */
+        gap: 10px; /* Adjust the gap between the components */
+    }
+
+    .custom-mud-textfield,
+    .custom-mud-select {
+        height: 40px; /* Adjust as needed to match the desired height */
+    }
+
+    
+
+    
+
+
+
+</style>
+
+
+<AuthorizeView>
+    <Authorized>
+
+
+
+<h5 class="ml-8" style="margin:20px;">Pre-checks & Eligibility checklist: (Datamatch)</h5>
+<MudSimpleTable  Class="ml-5 mr-5">
+    <thead>
+        <MudTr>
+            <MudTh Style="width:40%">Check List</MudTh>
+            <MudTh Style="width:10%">Status</MudTh>
+            <MudTh Style="width:40%">Check List</MudTh>
+            <MudTh Style="width:10%">Status</MudTh>
+            <!-- Add more columns if needed -->
+        </MudTr>
+    </thead>
+    <tbody>
+        @if (load)
+        {
+
+            @foreach (var chunk in ChunkData(_data.Data1to15, 2)) // Adjust chunk size for number of columns
+            {
+                <MudTr>
+                    @foreach (var item in chunk)
+                    {
+                        <MudTd>@item.CheckList</MudTd>
+                        <MudTd>@(item.CStatus == 1 ? "✅" : item.CStatus == 2 ? "NA" : item.CStatus == 3 ? "❌" : "")</MudTd>
+                    }
+                    @for (int i = chunk.Count; i < 2; i++) // Fill empty columns if needed
+                    {
+                        <MudTd></MudTd>
+                        <MudTd></MudTd>
+                    }
+                </MudTr>
+            }
+        }
+        else
+        {
+            <MudTr>
+                <MudTd colspan="4">No data available</MudTd> <!-- Adjust colspan based on number of columns -->
+            </MudTr>
+        }
+
+    </tbody>
+</MudSimpleTable>
+
+
+<h5 class="ml-5" style="margin:20px;">Survey checklist: (Survey Booked)</h5>
+<MudSimpleTable  Class="ml-5 mr-5">
+    <thead>
+        <MudTr>
+            <MudTh Style="width:40%">Check List</MudTh>
+            <MudTh Style="width:10%">Status</MudTh>
+            <MudTh Style="width:40%">Check List</MudTh>
+            <MudTh Style="width:10%">Status</MudTh>
+            <!-- Add more columns if needed -->
+        </MudTr>
+    </thead>
+    <tbody>
+        @if (load)
+        {
+
+            @foreach (var chunk in ChunkData(_data.Data16to47, 2)) // Adjust chunk size for number of columns
+            {
+                <MudTr>
+                    @foreach (var item in chunk)
+                    {
+                        <MudTd>@item.CheckList</MudTd>
+                         <MudTd>@(item.CStatus == 1 ? "✅" : item.CStatus == 2 ? "NA" : item.CStatus == 3 ? "❌" : "")</MudTd>
+                    }
+                    @for (int i = chunk.Count; i < 2; i++) // Fill empty columns if needed
+                    {
+                        <MudTd></MudTd>
+                        <MudTd></MudTd>
+                    }
+                </MudTr>
+            }
+        }
+        else
+        {
+            <MudTr>
+                <MudTd colspan="4">No data available</MudTd> <!-- Adjust colspan based on number of columns -->
+            </MudTr>
+        }
+
+    </tbody>
+</MudSimpleTable>
+
+
+<h5 class="ml-5" style="margin:20px;">PASHUB checklist: (PAS Installation)</h5>
+<MudSimpleTable  Class="ml-5 mr-5">
+    <thead>
+        <MudTr>
+            <MudTh Style="width:40%">Check List</MudTh>
+            <MudTh Style="width:10%">Status</MudTh>
+            <MudTh Style="width:40%">Check List</MudTh>
+            <MudTh Style="width:10%">Status</MudTh>
+            <!-- Add more columns if needed -->
+        </MudTr>
+    </thead>
+    <tbody>
+        @if (load)
+        {
+        
+                @foreach (var chunk in ChunkData(_data.Data48to56, 2)) // Adjust chunk size for number of columns
+                {
+                    <MudTr>
+                        @foreach (var item in chunk)
+                        {
+                            <MudTd>@item.CheckList</MudTd>
+                        <MudTd>@(item.CStatus == 1 ? "✅" : item.CStatus == 2 ? "NA" : item.CStatus == 3 ? "❌" : "")</MudTd>
+                        }
+                        @for (int i = chunk.Count; i < 2; i++) // Fill empty columns if needed
+                        {
+                            <MudTd></MudTd>
+                            <MudTd></MudTd>
+                        }
+                    </MudTr>
+                }
+            }
+            else
+            {
+                <MudTr>
+                    <MudTd colspan="4">No data available</MudTd> <!-- Adjust colspan based on number of columns -->
+                </MudTr>
+            }
+        
+    </tbody>
+</MudSimpleTable>
+
+<h5 class="ml-5" style="margin:20px;">LOFT Checklist: (Loft Installation)</h5>
+<MudSimpleTable  Class="ml-5 mr-5">
+    <thead>
+        <MudTr>
+            <MudTh Style="width:40%">Check List</MudTh>
+            <MudTh Style="width:10%">Status</MudTh>
+            <MudTh Style="width:40%">Check List</MudTh>
+            <MudTh Style="width:10%">Status</MudTh>
+            <!-- Add more columns if needed -->
+        </MudTr>
+    </thead>
+    <tbody>
+        @if (load)
+        {
+
+            @foreach (var chunk in ChunkData(_data.Data57to76, 2)) // Adjust chunk size for number of columns
+            {
+                <MudTr>
+                    @foreach (var item in chunk)
+                    {
+                        <MudTd>@item.CheckList</MudTd>
+                        <MudTd>@(item.CStatus == 1 ? "✅" : item.CStatus == 2 ? "NA" : item.CStatus == 3 ? "❌" : "")</MudTd>
+                    }
+                    @for (int i = chunk.Count; i < 2; i++) // Fill empty columns if needed
+                    {
+                        <MudTd></MudTd>
+                        <MudTd></MudTd>
+                    }
+                </MudTr>
+            }
+        }
+        else
+        {
+            <MudTr>
+                <MudTd colspan="4">No data available</MudTd> <!-- Adjust colspan based on number of columns -->
+            </MudTr>
+        }
+
+    </tbody>
+</MudSimpleTable>
+
+<h5 class="ml-5" style="margin:20px;">Boiler checklist: (Boiler Installation)</h5>
+<MudSimpleTable  Class="ml-5 mr-5">
+    <thead>
+        <MudTr>
+            <MudTh Style="width:40%">Check List</MudTh>
+            <MudTh Style="width:10%">Status</MudTh>
+            <MudTh Style="width:40%">Check List</MudTh>
+            <MudTh Style="width:10%">Status</MudTh>
+            <!-- Add more columns if needed -->
+        </MudTr>
+    </thead>
+    <tbody>
+        @if (load)
+        {
+
+            @foreach (var chunk in ChunkData(_data.Data77to102, 2)) // Adjust chunk size for number of columns
+            {
+                <MudTr>
+                    @foreach (var item in chunk)
+                    {
+                        <MudTd>@item.CheckList</MudTd>
+                        <MudTd>@(item.CStatus == 1 ? "✅" : item.CStatus == 2 ? "NA" : item.CStatus == 3 ? "❌" : "")</MudTd>
+                    }
+                    @for (int i = chunk.Count; i < 2; i++) // Fill empty columns if needed
+                    {
+                        <MudTd></MudTd>
+                        <MudTd></MudTd>
+                    }
+                </MudTr>
+            }
+        }
+        else
+        {
+            <MudTr>
+                <MudTd colspan="4">No data available</MudTd> <!-- Adjust colspan based on number of columns -->
+            </MudTr>
+        }
+
+    </tbody>
+</MudSimpleTable>
+
+<h5 class="ml-5" style="margin:20px;">RIR Checklist: (RIR Installation)</h5>
+<MudSimpleTable  Class="ml-5 mr-5">
+    <thead>
+        <MudTr>
+            <MudTh Style="width:40%">Check List</MudTh>
+            <MudTh Style="width:10%">Status</MudTh>
+            <MudTh Style="width:40%">Check List</MudTh>
+            <MudTh Style="width:10%">Status</MudTh>
+            <!-- Add more columns if needed -->
+        </MudTr>
+    </thead>
+    <tbody>
+        @if (load)
+        {
+
+            @foreach (var chunk in ChunkData(_data.Data103to121, 2)) // Adjust chunk size for number of columns
+            {
+                <MudTr>
+                    @foreach (var item in chunk)
+                    {
+                        <MudTd>@item.CheckList</MudTd>
+                        <MudTd>@(item.CStatus == 1 ? "✅" : item.CStatus == 2 ? "NA" : item.CStatus == 3 ? "❌" : "")</MudTd>
+                    }
+                    @for (int i = chunk.Count; i < 2; i++) // Fill empty columns if needed
+                    {
+                        <MudTd></MudTd>
+                        <MudTd></MudTd>
+                    }
+                </MudTr>
+            }
+        }
+        else
+        {
+            <MudTr>
+                <MudTd colspan="4">No data available</MudTd> <!-- Adjust colspan based on number of columns -->
+            </MudTr>
+        }
+
+    </tbody>
+</MudSimpleTable>
+<h5 class="ml-5" style="margin:20px;">EWI checklist: (EWI Installation)</h5>
+<MudSimpleTable  Class="ml-5 mr-5">
+    <thead>
+        <MudTr>
+            <MudTh Style="width:40%">Check List</MudTh>
+            <MudTh Style="width:10%">Status</MudTh>
+            <MudTh Style="width:40%">Check List</MudTh>
+            <MudTh Style="width:10%">Status</MudTh>
+            <!-- Add more columns if needed -->
+        </MudTr>
+    </thead>
+    <tbody>
+        @if (load)
+        {
+
+            @foreach (var chunk in ChunkData(_data.Data122to157, 2)) // Adjust chunk size for number of columns
+            {
+                <MudTr>
+                    @foreach (var item in chunk)
+                    {
+                        <MudTd>@item.CheckList</MudTd>
+                        <MudTd>@(item.CStatus == 1 ? "✅" : item.CStatus == 2 ? "NA" : item.CStatus == 3 ? "❌" : "")</MudTd>
+                    }
+                    @for (int i = chunk.Count; i < 2; i++) // Fill empty columns if needed
+                    {
+                        <MudTd></MudTd>
+                        <MudTd></MudTd>
+                    }
+                </MudTr>
+            }
+        }
+        else
+        {
+            <MudTr>
+                <MudTd colspan="4">No data available</MudTd> <!-- Adjust colspan based on number of columns -->
+            </MudTr>
+        }
+
+    </tbody>
+</MudSimpleTable>
+<h5 class="ml-5" style="margin:20px;">IWI checklist: (IWI Installation)</h5>
+<MudSimpleTable  Class="ml-5 mr-5">
+    <thead>
+        <MudTr>
+            <MudTh Style="width:40%">Check List</MudTh>
+            <MudTh Style="width:10%">Status</MudTh>
+            <MudTh Style="width:40%">Check List</MudTh>
+            <MudTh Style="width:10%">Status</MudTh>
+            <!-- Add more columns if needed -->
+        </MudTr>
+    </thead>
+    <tbody>
+        @if (load)
+        {
+
+            @foreach (var chunk in ChunkData(_data.Data158to174, 2)) // Adjust chunk size for number of columns
+            {
+                <MudTr>
+                    @foreach (var item in chunk)
+                    {
+                        <MudTd>@item.CheckList</MudTd>
+                        <MudTd>@(item.CStatus == 1 ? "✅" : item.CStatus == 2 ? "NA" : item.CStatus == 3 ? "❌" : "")</MudTd>
+                        
+
+                    }
+                    @for (int i = chunk.Count; i < 2; i++) // Fill empty columns if needed
+                    {
+                        <MudTd></MudTd>
+                        <MudTd></MudTd>
+                    }
+                </MudTr>
+            }
+        }
+        else
+        {
+            <MudTr>
+                <MudTd colspan="4">No data available</MudTd> <!-- Adjust colspan based on number of columns -->
+            </MudTr>
+        }
+
+    </tbody>
+</MudSimpleTable>
+
+    </Authorized>
+    <NotAuthorized>
+        <MudAlert ShowCloseIcon="true" CloseIconClicked="Navi" Severity="Severity.Error" Variant="Variant.Filled">
+            <MudAlertTitle>Access Denied</MudAlertTitle>
+            <MudAlertDescription>You are not authorized to access this page. Please Login</MudAlertDescription>
+        </MudAlert>
+        </NotAuthorized>
+</AuthorizeView>
+
+@code{
+    public void Navi()
+    {
+        NavigationManager.NavigateTo("/", forceLoad: true);
+    }
+    bool load = false;
+    private ApiResponse _data;
+    private int _formId = constant.FormId; 
+    //private int _formId = 1; 
+
+    protected override async Task OnInitializedAsync()
+    {
+        _data = await GetCheckListDataByFormId(_formId);
+    }
+
+
+    public async Task<ApiResponse> GetCheckListDataByFormId(int formId)
+    {
+        //write this code in try catch block
+        try
+        {
+            using var httpClient = new HttpClient();
+
+            var response = await httpClient.PostAsJsonAsync(constant.GetCheckListDataByFormId, new { FormId = formId });
+            response.EnsureSuccessStatusCode();
+            load = true;
+            _data= await response.Content.ReadFromJsonAsync<ApiResponse>();
+            return _data;
+        }
+        catch(Exception ex){
+            //handle exceptionr
+            return null;
+        }
+
+
+            
+ 
+
+     }
+    private bool HasData(List<CheckListItem> data) => data != null && data.Any();
+
+    private IEnumerable<List<CheckListItem>> ChunkData(List<CheckListItem> data, int chunkSize)
+    {
+        if (data == null) yield break;
+
+        for (int i = 0; i < data.Count; i += chunkSize)
+        {
+            yield return data.Skip(i).Take(chunkSize).ToList();
+        }
+    }
+
+    public class ApiResponse
+    {
+        public List<CheckListItem> Data1to15 { get; set; }
+        public List<CheckListItem> Data16to47 { get; set; }
+        public List<CheckListItem> Data48to56 { get; set; }
+        public List<CheckListItem> Data57to76 { get; set; }
+        public List<CheckListItem> Data77to102 { get; set; }
+        public List<CheckListItem> Data103to121 { get; set; }
+        public List<CheckListItem> Data122to157 { get; set; }
+        public List<CheckListItem> Data158to174 { get; set; }
+    }
+
+    public class CheckListItem
+    {
+        public int Id { get; set; }
+        public int FormId { get; set; }
+        public int CStatus { get; set; }
+        public int CheckListId { get; set; }
+        public string CheckList { get; set; }
+    }
+
+}

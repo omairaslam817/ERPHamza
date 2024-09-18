@@ -1,0 +1,208 @@
+﻿@using ERPHamza.Data
+@using System.Net.Http.Json
+@using Newtonsoft.Json
+@using System.Text;
+@using ERPHamza.Data.MyClasses
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+<style>
+
+    /* Optional: You can add CSS to style the table */
+    .mud-dialog-content {
+        background: #F3F3F3;
+    }
+
+    .card {
+        box-shadow: 0 1rem 2rem hsl(0 0% 0% / 20%);
+        gap: 5vmin;
+        background: hsl(0 0% 100%);
+        color: hsl(200 50% 20%);
+        line-height: 1.5;
+        font-size: 1.5rem;
+        font-weight: 300;
+        width: 100%;
+        height: 35vmin;
+        display: flex;
+        border-radius: 1ch;
+        border: 1px solid hsl(0 0% 83%);
+        display: grid;
+        grid-auto-flow: column;
+    }
+
+
+
+    my {
+        block-size: 100%;
+        inline-size: 100%;
+        background: hsl(0 0% 85%);
+    }
+
+</style>
+<MudDialog TitleClass="mud-primary">
+    <TitleContent>
+        <MudText Typo="Typo.h6" style="color: white;">IPAD Queries</MudText>
+    </TitleContent>
+    <DialogContent>
+
+        <MudCard>
+            <MudCardContent>
+                <MudGrid>
+                    <!-- First row -->
+                    <MudItem xs="8">
+                        @if (loaded)
+                        {
+                            <MudSelect Variant="Variant.Outlined" Margin="Margin.Dense" Label="Accessor name" @bind-Value="selectedIpadQ">
+                                <MudSelectItem T="string" Value="null" />
+                                @foreach (var ipad in IpadQList)
+                                {
+                                    <MudSelectItem Value="ipad" Label="@ipad" />
+                                }
+                            </MudSelect>
+
+                        }
+                    </MudItem>
+                    
+                    <MudItem  style="justify-content:flex-end;margin-left:60%">
+                    
+                        <MudButton Disabled="@_processing" OnClick="Submit" Variant="Variant.Filled" Color="Color.Success">
+                            @if (_processing)
+                            {
+                                <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                                <MudText Class="ms-2">Processing</MudText>
+                            }
+                            else
+                            {
+                                <MudText>Book Ipad</MudText>
+                            }
+                        </MudButton>
+                    </MudItem>
+
+                </MudGrid>
+
+            </MudCardContent>
+        </MudCard>
+
+
+
+
+
+    </DialogContent>
+</MudDialog>
+
+@code{
+    private bool _processing = false;
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    void Submit() {
+
+
+        UpdateJobToIPAD25();
+
+        
+
+
+
+    }
+    DateTime londonTime;
+    void Cancel() => MudDialog.Cancel();
+    private async Task UpdateJobToIPAD25()
+    {
+        if (string.IsNullOrEmpty(selectedIpadQ))
+        {
+            Snackbar.Add("Name is required !", Severity.Warning);
+            return;
+        }
+        DateTime utcTime = DateTime.UtcNow;
+        TimeZoneInfo londonTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Europe/London");
+        londonTime = TimeZoneInfo.ConvertTimeFromUtc(utcTime, londonTimeZone);
+        using (var httpClient = new HttpClient())
+            try
+            {
+
+                var Data = new
+                {
+                    Id = constant.FormId,
+                    IpadQAccessorName=selectedIpadQ
+
+                };
+
+
+                string jsonData = JsonConvert.SerializeObject(Data);
+                var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+
+                var response = await httpClient.PostAsync(constant.UpdateJobToIPAD25, content);
+
+                if (response.IsSuccessStatusCode)
+                {
+
+                    var message = await response.Content.ReadAsStringAsync();
+                    // DeleteRecordClass.DeleteRecordInFormJob(ID, 8);
+                    //AddRecordClass.AddRecordInFormJob(ID, 17);
+                    AuditClasss.Audit(constant.FormId, constant.LoginUserName, londonTime, "Book IPAD");
+                    Snackbar.Add(message, Severity.Success);
+                    StateHasChanged();
+                    MudDialog.Close(DialogResult.Ok(true));
+                     NavigationManager.NavigateTo("/IPADQueue", true);
+                   
+                }
+                else
+                {
+                    var errorMessage = await response.Content.ReadAsStringAsync();
+                    Snackbar.Add(errorMessage, Severity.Error);
+
+
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+
+                Snackbar.Add(ex.Message, Severity.Error);
+            }
+    }
+
+
+
+
+    protected override async void OnInitialized()
+    {
+
+        //base.OnInitialized();
+
+        await IpadqList();
+    }
+    private string selectedIpadQ;
+    bool loaded = false;
+    private List<string> IpadQList;
+
+    private async Task IpadqList()
+    {
+        try
+        {
+
+
+
+            var client = new HttpClient();
+            var response = await client.GetAsync(constant.GetRetrifitAssessorName);
+            if (response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                IpadQList = JsonConvert.DeserializeObject<List<string>>(content);
+                loaded = true;
+                StateHasChanged();
+
+            }
+            else
+            {
+                var errorMessage = await response.Content.ReadAsStringAsync();
+                Snackbar.Add(errorMessage, Severity.Error);
+            }
+        }
+        catch (Exception e)
+        {
+
+            Snackbar.Add(e.ToString(), Severity.Error);
+        }
+    }
+}

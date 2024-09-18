@@ -1,0 +1,483 @@
+﻿
+<PageTitle>Lodgement Done</PageTitle>
+
+@page "/LodgementDone"
+@using System.Text.RegularExpressions
+@using System.ComponentModel.DataAnnotations
+@using ERPHamza.Data
+@using System.Net.Http.Json
+@using System.Text;
+@using ERPHamza.Data.MyClasses
+@using Newtonsoft.Json
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+@inject IDialogService DialogService
+<style>
+    .mud-appbar .mud-toolbar-appbar {
+        background-color: #FFFFFF;
+    }
+
+
+
+    .mud-appbar .mud-toolbar-appbar {
+        background-color: #FFFFFF;
+    }
+
+</style>
+
+
+<div class="card-header mt-2">
+    <h5>Lodgement Done</h5>
+</div>
+
+@if (loading)
+{
+    <center style="margin-top:5%;">
+        <img src="macGif.gif" alt="Loading" width="30" height="30">
+    </center>
+
+}
+else
+{
+    <table class="table mt-12 mr-4 ml-4">
+        <thead>
+            <tr>
+                <th class="col-1">#</th>
+                <th class="col-3">RefNo</th>
+                <th class="col-3">Address</th>
+                <th class="col-5" style="text-align: center;">Action</th>
+            </tr>
+        </thead>
+
+        @if (formList.Count > 0)
+        {
+            <tbody>
+                @foreach (var result in formList)
+                {
+
+                    <tr>
+                        <th scope="row">@(formList.IndexOf(result) + 1)</th>
+                        <td>@result.JobFormRecord.RefNo</td>
+                        <td>@result.JobFormRecord.AddressLine1</td>
+                        <td>
+                             <MudButton OnClick="@((e) => GoToJob(result))" Variant="Variant.Outlined" Color="Color.Success" style="margin-right:50px">Job Details</MudButton>
+                            <MudButton Variant="Variant.Outlined" OnClick="@((e) => ShowConfirmation2(result))" Color="Color.Success">TM Query</MudButton>
+                            <MudButton Variant="Variant.Outlined" Color="Color.Success" OnClick="@((e) => ShowConfirmation(result))">Job Closed</MudButton>
+                           @*  <MudButton Variant="Variant.Outlined" Color="Color.Success" @onclick="@(() => UpdateJobBooked22(result))">Submission Done</MudButton> *@
+                        </td>
+                    </tr>
+
+                }
+            </tbody>
+        }
+
+
+
+
+
+    </table>
+    @if (formList.Count == 0)
+    {
+        <img class="center" style="height:300px;width:300px; display: block; margin-left: auto;   margin-right: auto;" src="nodata.gif">
+    }
+    <MudOverlay @bind-Visible="PopUpConfirm" DarkBackground="true" AutoClose="false">
+        <MudPopover Open="@PopUpConfirm" AnchorOrigin="Origin.CenterCenter" TransformOrigin="Origin.CenterCenter">
+
+            <MudCard>
+                <MudCardContent>
+                    <MudText Typo="Typo.h6">Confirmation</MudText>
+                    <MudText Typo="Typo.body2">
+                        Are you sure you want to perform this action? <b>This process cannot be undone.</b>
+                    </MudText>
+                </MudCardContent>
+                <MudCardActions Style="justify-content:end">
+                    <MudButton OnClick="closeConfirmation" Color="Color.Error">Cancel</MudButton>
+                    <MudButton OnClick="UpdateJobBooked23" Color="Color.Success">Ok</MudButton>
+                </MudCardActions>
+            </MudCard>
+
+        </MudPopover>
+    </MudOverlay>
+    <MudOverlay @bind-Visible="PopUpTMQ" DarkBackground="true" AutoClose="false">
+        <MudPopover Open="@PopUpTMQ" AnchorOrigin="Origin.CenterCenter" TransformOrigin="Origin.CenterCenter">
+
+            <MudCard>
+                <MudCardHeader Style="border-bottom:1px solid #DEE2E6">
+                    <MudText Typo="Typo.h5">TM Queries</MudText>
+                </MudCardHeader>
+                <MudCardContent>
+
+                    <MudGrid>
+                        <MudItem xs="4">
+                            <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" Disabled="true" @bind-Value="_textA" Label="Trust Mark" />
+                        </MudItem>
+                        <MudItem xs="4">
+                            <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" @bind-Value="_textB" Label="TM Query Text" />
+                        </MudItem>
+                        <MudItem>
+                            <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="AddItem">Add</MudButton>
+                        </MudItem>
+                        <MudItem>
+                            <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="SaveItems">Save</MudButton>
+                        </MudItem>
+                    </MudGrid>
+
+                    <MudTable Items="items">
+                        <HeaderContent>
+                            <MudTh>TM</MudTh>
+                            <MudTh>TM Query Text</MudTh>
+                            <MudTh>Actions</MudTh>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd DataLabel="Item">@context.TextA</MudTd>
+                            <MudTd DataLabel="Item">@context.TextB</MudTd>
+                            <MudTd DataLabel="Action">
+                                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => RemoveItem(context)" />
+                            </MudTd>
+
+
+                        </RowTemplate>
+                    </MudTable>
+
+
+                </MudCardContent>
+                <MudCardActions Style="justify-content:end">
+                    <MudButton OnClick="closeConfirmation2" Color="Color.Error">Cancel</MudButton>
+
+                </MudCardActions>
+            </MudCard>
+        </MudPopover>
+    </MudOverlay>
+
+
+}
+
+@code{public void GoToJob(FormModel result){constant.FormId = result.JobFormRecord.Id;NavigationManager.NavigateTo("/job", true);}
+
+    private string _textA;
+    private string _textB;
+    private List<Item> items = new List<Item>();
+    public class Item
+    {
+        public string TextA { get; set; } = "Trust Mark";
+        public string TextB { get; set; }
+        public string Status { get; set; } = "Awaiting";
+    }
+    private bool PopUpTMQ = false;
+
+    private void ShowConfirmation2(FormModel result)
+    {
+        constant.FormId = result.JobFormRecord.Id;
+        PopUpTMQ = true;
+
+
+    }
+    private void closeConfirmation2()
+    {
+        constant.FormId = 0;
+        PopUpTMQ = false;
+        _textB = string.Empty;
+        items.Clear();
+    }
+    private void RemoveItem(Item item)
+    {
+        items.Remove(item);
+    }
+    private void AddItem()
+    {
+        if (!string.IsNullOrEmpty(_textB))
+        {
+            // Check if an item with the same TextB already exists
+            bool itemExists = items.Any(item => item.TextB.Equals(_textB, StringComparison.OrdinalIgnoreCase));
+
+            if (!itemExists)
+            {
+                items.Add(new Item { TextA = "Trust Mark", TextB = _textB, Status="Awaiting" });
+                _textB = string.Empty; // Clear the input field after adding
+            }
+            else
+            {
+                // Optionally, you can show a message or notification that the item already exists
+                Snackbar.Add("Item already exists.", Severity.Error);
+            }
+        }
+    }
+
+    private void SaveItems()
+    {
+        var dataToSend = items
+    .Select(q => new { q.TextA, q.TextB, FormNo = constant.FormId, q.Status })
+    .ToList();
+        if (dataToSend.Count == 0)
+        {
+            Snackbar.Add("Please add atleast one record", Severity.Error);
+
+        }
+        else
+        {
+            DateTime utcTime = DateTime.UtcNow;
+            TimeZoneInfo londonTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Europe/London");
+            londonTime = TimeZoneInfo.ConvertTimeFromUtc(utcTime, londonTimeZone);
+            using (var httpClient = new HttpClient())
+                try
+                {
+                    string jsonData = JsonConvert.SerializeObject(dataToSend);
+                    var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+
+                    var response = httpClient.PostAsync(constant.SaveTMQItemsList, content).Result;
+
+                    if (response.IsSuccessStatusCode)
+                    {
+
+
+
+
+                        DeleteRecordClass.DeleteRecordInFormJob(constant.FormId, 21);
+                        AddRecordClass.AddRecordInFormJob(constant.FormId, 45);
+                        AuditClasss.Audit(constant.FormId, constant.LoginUserName, londonTime, "TM Quries");
+                        var obj = formList.FirstOrDefault(x => x.FormId == constant.FormId);
+                        formList.Remove(obj);
+                        Snackbar.Add("TM Quries Added", Severity.Success);
+                        items.Clear();
+                        _textB = string.Empty;
+                        PopUpTMQ = false;
+                        StateHasChanged();
+                    }
+                    else
+                    {
+                        var errorMessage = response.Content.ReadAsStringAsync().Result;
+                        Snackbar.Add(errorMessage, Severity.Error);
+                    }
+                }
+                catch (Exception e)
+                {
+                    Snackbar.Add("Try Catch Error: " + e, Severity.Error);
+                }
+        }
+    }
+
+
+
+
+
+    private bool PopUpConfirm = false;
+
+    private void ShowConfirmation(FormModel result)
+    {
+        constant.FormId = result.JobFormRecord.Id;
+        PopUpConfirm = true;
+
+
+    }
+    private void closeConfirmation()
+    {
+        constant.FormId = 0;
+        PopUpConfirm = false;
+    }
+    bool loading = true;
+
+    public int ID = 0;
+    public string refno = "";
+
+    private List<FormModel> formList = new List<FormModel>();
+    public class JobFormRecord
+    {
+        public int Id { get; set; }
+        public string RefNo { get; set; }
+
+        public string AddressLine1 { get; set; }
+
+        public string SurveyName { get; set; }
+
+        public int Status { get; set; }
+    }
+    public class FormModel
+    {
+        public int Id { get; set; }
+        public int FormId { get; set; }
+        public int Status { get; set; }
+        public JobFormRecord JobFormRecord { get; set; }
+    }
+
+
+
+
+    protected override void OnInitialized()
+    {
+
+        //base.OnInitialized();
+
+        Form1BySat21();
+        if (string.IsNullOrEmpty(constant.LoginUserName))
+        {
+            NavigationManager.NavigateTo("/", forceLoad: true);
+        }
+    }
+
+    private async Task Form1BySat21()
+    {
+        using (var httpClient = new HttpClient())
+            try
+            {
+                var response = await httpClient.GetAsync(constant.Form1BySat21);
+                if (response.IsSuccessStatusCode)
+                {
+
+
+                    var jsonString = await response.Content.ReadAsStringAsync();
+                    formList = JsonConvert.DeserializeObject<List<FormModel>>(jsonString).ToList();
+                    loading = false;
+                    StateHasChanged();
+                }
+                else
+                {
+                    loading = false;
+                    var errorMessage = await response.Content.ReadAsStringAsync();
+                    Snackbar.Add(errorMessage, Severity.Error);
+                }
+
+            }
+            catch (Exception e)
+            {
+
+                Snackbar.Add("Try Catch Error: " + e, Severity.Error);
+            }
+
+    }
+    DateTime londonTime;
+    private async Task UpdateJobBooked23()
+
+    {
+        DateTime utcTime = DateTime.UtcNow;
+        TimeZoneInfo londonTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Europe/London");
+        londonTime = TimeZoneInfo.ConvertTimeFromUtc(utcTime, londonTimeZone);
+
+        using (var httpClient = new HttpClient())
+            try
+            {
+
+                var Data = new
+                {
+                    Id = constant.FormId
+
+
+                };
+
+
+                string jsonData = JsonConvert.SerializeObject(Data);
+                var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+
+                var response = await httpClient.PostAsync(constant.UpdateJobBooked23, content);
+
+                if (response.IsSuccessStatusCode)
+                {
+
+                    var message = await response.Content.ReadAsStringAsync();
+
+                    DeleteRecordClass.DeleteRecordInFormJob(constant.FormId, 21);
+                    AddRecordClass.AddRecordInFormJob(constant.FormId, 24);
+                    AuditClasss.Audit(constant.FormId, constant.LoginUserName, londonTime, "Job Closed");
+                    // var obj = formList.FirstOrDefault(x => x.FormId == constant.FormId);
+                    // formList.Remove(obj);
+                    StateHasChanged();
+                    NavigationManager.NavigateTo("/LodgementDone", forceLoad: true);
+                    Snackbar.Add(message, Severity.Success);
+                }
+                else
+                {
+                    var errorMessage = await response.Content.ReadAsStringAsync();
+                    Snackbar.Add(errorMessage, Severity.Error);
+
+
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                // Handle exceptions
+                Console.WriteLine("An error occurred: " + ex.Message);
+                Snackbar.Add(ex.Message, Severity.Error);
+            }
+
+    }
+
+    private async Task UpdateJobBooked22(FormModel result)
+
+    {
+        DateTime utcTime = DateTime.UtcNow;
+        TimeZoneInfo londonTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Europe/London");
+        londonTime = TimeZoneInfo.ConvertTimeFromUtc(utcTime, londonTimeZone);
+
+        using (var httpClient = new HttpClient())
+            try
+            {
+
+                var Data = new
+                {
+                    Id = result.FormId
+
+
+                };
+
+
+                string jsonData = JsonConvert.SerializeObject(Data);
+                var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+
+                var response = await httpClient.PostAsync(constant.UpdateJobBooked22, content);
+
+                if (response.IsSuccessStatusCode)
+                {
+
+                    var message = await response.Content.ReadAsStringAsync();
+                  
+                    DeleteRecordClass.DeleteRecordInFormJob(result.JobFormRecord.Id, 21);
+                    AddRecordClass.AddRecordInFormJob(result.JobFormRecord.Id, 22);
+                    AuditClasss.Audit(result.JobFormRecord.Id, constant.LoginUserName, londonTime, "Lodgement Done");
+                    var obj = formList.FirstOrDefault(x => x.FormId == result.FormId);
+                    formList.Remove(obj);
+                    StateHasChanged();
+                   // NavigationManager.NavigateTo("/LodgementDone", forceLoad: true);
+                    Snackbar.Add(message, Severity.Success);
+                }
+                else
+                {
+                    var errorMessage = await response.Content.ReadAsStringAsync();
+                    Snackbar.Add(errorMessage, Severity.Error);
+
+
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                // Handle exceptions
+                Console.WriteLine("An error occurred: " + ex.Message);
+                Snackbar.Add(ex.Message, Severity.Error);
+            }
+
+    }
+
+    DialogOptions maxWidth = new DialogOptions() { MaxWidth = MaxWidth.Medium, FullWidth = true, CloseButton = true };
+
+    private void OpenDialog(DialogOptions options, FormModel result)
+    {
+
+        constant.refno = result.JobFormRecord.RefNo;
+        // LoadForm1Data();
+        DialogService.Show<ViewJobDetailsDialog>("Custom Options Dialog", options);
+    }
+
+
+
+
+
+
+
+}
+
+
+
+
+

@@ -1,0 +1,1242 @@
+﻿@page "/index"
+@using MudBlazor
+@using ERPHamza.Data
+@inject NavigationManager NavigationManager
+@inject ISnackbar Snackbar
+@using System.Text.RegularExpressions
+@using System.ComponentModel.DataAnnotations
+@using System.Net.Http.Json
+@using System.Text;
+@using Newtonsoft.Json
+@inject Blazored.LocalStorage.ILocalStorageService _localStorage
+@inject AuthenticationStateProvider authStateProvider
+
+
+
+<PageTitle>Dashboard</PageTitle>
+<style>
+    .mud-main-content {
+        background-color: #EDF0F5;
+    }
+        .card-body:hover {
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+    }
+
+    h3, p, h2 {
+        color: white;
+    }
+
+        p.mud-typography.mud-typography-body2 {
+            color:black;
+        }
+</style>
+@if (isLoading)
+{
+    <h5 class="SubHeading">Loading...</h5>  <!-- Or a spinner, etc. -->
+}
+else{
+<AuthorizeView>
+    <Authorized>
+<div class="row">
+    <div class="col-3 mt-2 ">
+        <h4 style="margin-left:20px"> </h4>
+    </div>
+    <div class="col-6 mt-2 mb-1">
+    </div>
+    <div class="col-3 mt-2 mb-1">
+        <MudButton Href="/addjobs" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Style="background:#9b2bb2;color:white">Add new Job</MudButton>
+  @*       <MudButton OnClick="ShowConfirmation" Style="background:#fd9700;color:white" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Search">Search</MudButton>
+    *@ </div>
+</div>
+
+
+
+<div class="row mt-2">
+    <div class="col-3 ml-8">
+        <h4>Job Work Flow</h4>
+    </div>
+
+    <div class="col-3" style="margin-left:45%">
+    <h4>Installation Work Flow</h4>
+    </div>
+</div>
+
+
+
+@* ------------ Row 1----------- *@
+    <MudGrid Spacing="1">
+        <MudItem xs="6">
+            <MudGrid Spacing="0">
+                <MudItem xs="6">
+                <MudPaper Class="pa-4 ma-2 card-body" Elevation="3" Style="background:#9b2bb2">
+                        <a href="/DataMatchList">
+                            <h3>
+                                DATA MATCHED
+                            </h3>
+                            <p style="font-size:15px;">
+                                (Awaiting Survey Bookings)
+                            </p>
+                        <h2 style="float:right;margin-top:-25px">@status1Count</h2>
+                        </a>
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="6">
+                <MudPaper Class="pa-4 ma-2 card-body" Elevation="3" Style="background:#9b2bb2">
+                        <a href="/listbookedsurvey">
+                            <h3>
+                                SURVEY BOOKED
+                            </h3>
+                            <p style="font-size:15px;">
+                                (Awaiting Survey Evidences)
+                            </p>
+                        <h2 style="float:right;margin-top:-25px">@status2Count</h2>
+                        </a>
+                    </MudPaper>
+                </MudItem>
+            </MudGrid>
+        </MudItem>
+
+    <MudItem xs="6">
+            <MudGrid Spacing="1">
+                <!-- Reduced spacing -->
+                <MudItem xs="4" Style="border-left:1px solid;">
+                <MudPaper Class="pa-2 ma-1 card-body" Elevation="3" Style="background:#fd9700">
+                        <!-- Reduced padding and margin -->
+                    <a href="PassIns">
+                            <h3>
+                                PAS
+                            </h3>
+                            <h3>
+                                AWAITING
+                            </h3>
+                            <span>&nbsp;</span>
+                            <h2 style="float:right;margin-top:-10px">@status7Count</h2>
+                        </a>
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="4">
+                <MudPaper Class="pa-2 ma-1 card-body" Elevation="3" Style="background:#fd9700">
+                        <!-- Reduced padding and margin -->
+                    <a href="PassInstaBooked">
+                            <h3>
+                                PAS
+                           </h3>
+                            <h3>
+                                BOOKED
+                           </h3>
+                            <span>&nbsp;</span>
+                        <h2 style="float:right;margin-top:-10px">@status42Count</h2>
+                        </a>
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="4">
+                <MudPaper Class="pa-2 ma-1 card-body" Elevation="3" Style="background:#fd9700">
+                        <!-- Reduced padding and margin -->
+                    <a href="PassInstaDone">
+                        <h3>
+                            PAS
+                       </h3>
+                        <h3>
+                            DONE
+                       </h3>
+                        <span>&nbsp;</span>
+                        <h2 style="float:right;margin-top:-10px">@status43Count</h2>
+                    </a>
+                    </MudPaper>
+                </MudItem>
+            </MudGrid>
+        </MudItem>
+    </MudGrid>
+
+
+
+
+
+
+ 
+    @* /-----------Row 2 -------------/ *@
+
+    <MudGrid Spacing="1">
+        <MudItem xs="6">
+            <MudGrid Spacing="0">
+                <MudItem xs="6">
+
+                <MudPaper Class="pa-4 ma-2 card-body" Elevation="3" Style="background:#9b2bb2">
+                        <a href="/SurveyDone">
+                        <h3>
+                            SURVEY DONE
+                       </h3>
+                        <p style="font-size:15px;">
+                            (Awaiting for EPR)
+                        </p>
+                        <h2 style="float:right;margin-top:-25px">@status3Count</h2>
+                        </a>
+                    </MudPaper>
+
+                </MudItem>
+                <MudItem xs="6">
+
+                <MudPaper Class="pa-4 ma-2 card-body" Elevation="3" Style="background:#9b2bb2">
+                         <a href="/EPRDoneList">
+                        <h3>
+                            EPR DONE (Without CC)
+                       </h3>
+                        <p style="font-size:15px;">
+                            (Awaiting for Agreement)
+                        </p>
+                        <h2 style="float:right;margin-top:-25px">@status4Count</h2>
+                        </a>
+                    </MudPaper>
+
+                </MudItem>
+            </MudGrid>
+        </MudItem>
+        <MudItem xs="6">
+            <MudGrid Spacing="1">
+                <MudItem xs="4" Style="border-left:1px solid;">
+
+                <MudPaper Class="pa-2 ma-1 card-body" Elevation="3" Style="background:#fd9700">
+                    <a href="/Loft">
+                           
+                        <h3>
+                            LOFT
+                       </h3>
+                        <h3>
+                            AWAITING
+                       </h3>
+                        <span>&nbsp;</span>
+                        <h2 style="float:right;margin-top:-10px">@status9Count</h2>
+                        </a>
+                    </MudPaper>
+
+                </MudItem>
+                <MudItem xs="4" >
+
+                <MudPaper Class="pa-2 ma-1 card-body" Elevation="3" Style="background:#fd9700">
+                    <a href="/LoftBooked">
+                        <h3>
+                            LOFT
+                       </h3>
+                        <h3>
+                            BOOKED
+                       </h3>
+                        <span>&nbsp;</span>
+                        <h2 style="float:right;margin-top:-10px">@status26Count</h2>
+                        </a>
+                    </MudPaper>
+
+                </MudItem>
+                <MudItem xs="4">
+
+                <MudPaper Class="pa-2 ma-1 card-body" Elevation="3" Style="background:#fd9700">
+                    <a href="/LoftDone">
+                        <h3>
+                            LOFT
+                       </h3>
+                        <h3>
+                            DONE
+                       </h3>
+                    <span>&nbsp;</span>
+                    <h2 style="float:right;margin-top:-10px">@status27Count</h2>
+                    </a>
+                    </MudPaper>
+
+                </MudItem>
+            </MudGrid>
+        </MudItem>
+    </MudGrid>
+   
+    @* /-----------Row 3 -------------/ *@
+    <MudGrid Spacing="1">
+        <MudItem xs="6">
+            <MudGrid Spacing="0">
+                <MudItem xs="6">
+
+                <MudPaper Class="pa-4 ma-2 card-body" Elevation="3" Style="background:#9b2bb2">
+                         <a href="/JobCountributionPage">
+                        <h3>
+                            @* JOB DONE (With CC) *@
+                            EPR DONE (With CC)
+                       </h3>
+                        <p style="font-size:15px;">
+                            (Awaiting for contribution)
+                        </p>
+                        <h2 style="float:right;margin-top:-25px">@status5Count</h2>
+                        </a>
+                    </MudPaper>
+
+                </MudItem>
+                <MudItem xs="6">
+
+                <MudPaper Class="pa-4 ma-2 card-body" Elevation="3" Style="background:#9b2bb2">
+                            <a href="/CustomerAgreedListPage">
+                        <h3>
+                            CUSTOMER AGREED
+                       </h3>
+                        <p style="font-size:15px;">
+                            (Awaiting Installations)
+                        </p>
+                        <h2 style="float:right;margin-top:-25px">@status6Count</h2>
+                        </a>
+                    </MudPaper>
+
+                </MudItem>
+            </MudGrid>
+        </MudItem>
+
+
+        <MudItem xs="6">
+            <MudGrid Spacing="1">
+                <MudItem xs="4" Style="border-left:1px solid;">
+
+                <MudPaper Class="pa-2 ma-1 card-body" Elevation="3" Style="background:#fd9700">
+                    <a href="/RIR">
+                        <h3>
+                            RIR
+                       </h3>
+                        <h3>
+                            AWAITING
+                       </h3>
+                        <span>&nbsp;</span>
+                        <h2 style="float:right;margin-top:-10px">@status10Count</h2>
+                        </a>
+                    </MudPaper>
+
+                </MudItem>
+                <MudItem xs="4" >
+
+                <MudPaper Class="pa-2 ma-1 card-body" Elevation="3" Style="background:#fd9700">
+                        <a href="/bookrir">
+                            
+                        <h3>
+                            RIR
+                       </h3>
+                        <h3>
+                            BOOKED
+                       </h3>
+                        <span>&nbsp;</span>
+                        <h2 style="float:right;margin-top:-10px">@status28Count</h2>
+                        </a>
+                    </MudPaper>
+
+                </MudItem>
+                <MudItem xs="4">
+
+                <MudPaper Class="pa-2 ma-1 card-body" Elevation="3" Style="background:#fd9700">
+                        <a href="/RIRDone">
+                        <h3>
+                            RIR
+                       </h3>
+                        <h3>
+                            DONE
+                       </h3>
+                    <span>&nbsp;</span>
+                    <h2 style="float:right;margin-top:-10px">@status29Count</h2>
+                    </a>
+                    </MudPaper>
+
+                </MudItem>
+            </MudGrid>
+        </MudItem>
+    </MudGrid>
+
+    @* /-----------Row 4 -------------/ *@
+    <MudGrid Spacing="1">
+        <MudItem xs="6">
+            <MudGrid Spacing="0">
+                <MudItem xs="6">
+
+                <MudPaper Class="pa-4 ma-2 card-body" Elevation="3" Style="background:#9b2bb2">
+                    <a href="/IPADQueue">
+                        <h3>
+                            IPAD QUEUE
+                       </h3>
+                        <p style="font-size:15px;">
+                            &nbsp;
+                        </p>
+                        <h2 style="float:right;margin-top:-25px">@status8Count</h2>
+                    </a>
+                </MudPaper>
+
+                </MudItem>
+                <MudItem xs="6">
+
+                <MudPaper Class="pa-4 ma-2 card-body" Elevation="3" Style="background:#9b2bb2">
+                    <a href="/IPADQComplete">
+                        <h3>
+                            IPAD COMPLETED
+                       </h3>
+                        <p style="font-size:15px;">
+                            &nbsp;
+                        </p>
+                        <h2 style="float:right;margin-top:-25px">@status44Count</h2>
+                    </a>
+                </MudPaper>
+
+                </MudItem>
+            </MudGrid>
+        </MudItem>
+
+
+
+        <MudItem xs="6">
+            <MudGrid Spacing="1">
+                <MudItem xs="4" Style="border-left:1px solid;">
+
+                <MudPaper Class="pa-2 ma-1 card-body" Elevation="3" Style="background:#fd9700">
+                        <a href="/EWI">
+                            
+                        <h3>
+                            EWI
+                            
+                       </h3>
+                        <h3>
+                            AWAITING
+                       </h3>
+                        <span>&nbsp;</span>
+                        <h2 style="float:right;margin-top:-10px">@status11Count</h2>
+                        </a>
+                    </MudPaper>
+
+                </MudItem>
+                <MudItem xs="4">
+
+                <MudPaper Class="pa-2 ma-1 card-body" Elevation="3" Style="background:#fd9700">
+                    <a href="/EWIBooked">
+                        <h3>
+                            EWI
+
+                       </h3>
+                        <h3>
+                            BOOKED
+                       </h3>
+                        <span>&nbsp;</span>
+                        <h2 style="float:right;margin-top:-10px">@status30Count</h2>
+                        </a>
+                    </MudPaper>
+
+                </MudItem>
+                <MudItem xs="4">
+
+                <MudPaper Class="pa-2 ma-1 card-body" Elevation="3" Style="background:#fd9700">
+                        <a href="/EWIDone">
+                        <h3>
+                            EWI
+
+                       </h3>
+                        <h3>
+                            DONE
+                       </h3>
+                    <span>&nbsp;</span>
+                    <h2 style="float:right;margin-top:-10px">@status31Count</h2>
+                    </a>
+                    </MudPaper>
+
+                </MudItem>
+            </MudGrid>
+        </MudItem>
+    </MudGrid>
+
+    @* /-----------Row 5 -------------/ *@
+    <MudGrid Spacing="1">
+        <MudItem xs="6">
+            <MudGrid Spacing="0">
+                <MudItem xs="6">
+
+                <MudPaper Class="pa-4 ma-2 card-body" Elevation="3" Style="background:#469549">
+                    <a href="/RCInstructed">
+                        <h3>
+                            RC INSTRUCTED
+                       </h3>
+                        <p style="font-size:15px;">
+                            (Awaiting Installation)
+                        </p>
+                        <h2 style="float:right;margin-top:-25px">@status17Count</h2>
+                    </a>
+                </MudPaper>
+
+                </MudItem>
+                <MudItem xs="6">
+
+                <MudPaper Class="pa-4 ma-2 card-body" Elevation="3" Style="background:#469549">
+                    <a href="/InstallsDone">
+                        <h3>
+                            PROJECT COMPLETED
+                       </h3>
+                        <p style="font-size:15px;">
+                            (Awaiting Post Stages)
+                        </p>
+                        <h2 style="float:right;margin-top:-25px">@status18Count</h2>
+                    </a>
+                </MudPaper>
+
+                </MudItem>
+            </MudGrid>
+        </MudItem>
+
+
+        <MudItem xs="6">
+            <MudGrid Spacing="1">
+                <MudItem xs="4" Style="border-left:1px solid;">
+
+                <MudPaper Class="pa-2 ma-1 card-body" Elevation="3" Style="background:#fd9700">
+                        <a href="/IWI">
+                            
+                        <h3>
+                            IWI
+                            
+                       </h3>
+                        <h3>
+                            AWAITING
+                       </h3>
+                        <span>&nbsp;</span>
+                        <h2 style="float:right;margin-top:-10px">@status12Count</h2>
+                        </a>
+                    </MudPaper>
+
+                </MudItem>
+                <MudItem xs="4">
+
+                <MudPaper Class="pa-2 ma-1 card-body" Elevation="3" Style="background:#fd9700">
+                        <a href="/IWIBooking">
+                           
+                        <h3>
+                            IWI
+
+                       </h3>
+                        <h3>
+                            BOOKED
+                       </h3>
+                        <span>&nbsp;</span>
+                        <h2 style="float:right;margin-top:-10px">@status32Count</h2>
+                        </a>
+                    </MudPaper>
+
+                </MudItem>
+                <MudItem xs="4">
+
+                <MudPaper Class="pa-2 ma-1 card-body" Elevation="3" Style="background:#fd9700">
+                        <a href="/IWIDone">
+                        <h3>
+                            IWI
+
+                       </h3>
+                        <h3>
+                            DONE
+                       </h3>
+                    <span>&nbsp;</span>
+                    <h2 style="float:right;margin-top:-10px">@status33Count</h2>
+                    </a>
+                    </MudPaper>
+
+                </MudItem>
+            </MudGrid>
+        </MudItem>
+    </MudGrid>
+
+    @* /-----------Row 6 -------------/ *@
+    <MudGrid Spacing="1">
+        <MudItem xs="6">
+            <MudGrid Spacing="0">
+                <MudItem xs="6">
+
+                <MudPaper Class="pa-4 ma-2 card-body" Elevation="3" Style="background:#469549">
+                    <a href="/PostStageDone">
+                        <h3>
+                            POST STAGE DONE
+                       </h3>
+                        <p style="font-size:15px;">
+                            (Awaiting IBG Insurance)
+                        </p>
+                        <h2 style="float:right;margin-top:-25px">@status19Count</h2>
+                    </a>
+                </MudPaper>
+
+                </MudItem>
+                <MudItem xs="6">
+
+                <MudPaper Class="pa-4 ma-2 card-body" Elevation="3" Style="background:#469549">
+                    <a href="/GDGC">
+                        <h3>
+                            GDGC DONE
+                       </h3>
+                        <p style="font-size:15px;">
+                            (Awaiting Lodgement)
+                        </p>
+                        <h2 style="float:right;margin-top:-25px">@status20Count</h2>
+                    </a>
+                </MudPaper>
+
+                </MudItem>
+            </MudGrid>
+        </MudItem>
+        <MudItem xs="6">
+            <MudGrid Spacing="1">
+                <MudItem xs="4" Style="border-left:1px solid;">
+
+                <MudPaper Class="pa-2 ma-1 card-body" Elevation="3" Style="background:#fd9700">
+                    <a href="/BoilerInstallation">
+                            
+                        <h3>
+                            BOILER
+                       </h3>
+                        <h3>
+                            AWAITING
+                       </h3>
+                        <span>&nbsp;</span>
+                        <h2 style="float:right;margin-top:-10px">@status13Count</h2>
+                        </a>
+                    </MudPaper>
+
+                </MudItem>
+                <MudItem xs="4" >
+
+                <MudPaper Class="pa-2 ma-1 card-body" Elevation="3" Style="background:#fd9700">
+                    <a href="/BoilerBooking">
+                        <h3>
+                            BOILER
+                       </h3>
+                        <h3>
+                            BOOKED
+                       </h3>
+                        <span>&nbsp;</span>
+                        <h2 style="float:right;margin-top:-10px">@status34Count</h2>
+                        </a>
+                    </MudPaper>
+
+                </MudItem>
+                <MudItem xs="4">
+
+                <MudPaper Class="pa-2 ma-1 card-body" Elevation="3" Style="background:#fd9700">
+                    <a href="/BoilerDone">
+                        <h3>
+                            BOILER
+                       </h3>
+                        <h3>
+                            DONE
+                       </h3>
+                    <span>&nbsp;</span>
+                    <h2 style="float:right;margin-top:-10px">@status35Count</h2>
+                    </a>
+                    </MudPaper>
+
+                </MudItem>
+            </MudGrid>
+        </MudItem>
+    </MudGrid>
+
+    @* /-----------Row 7 -------------/ *@
+    <MudGrid Spacing="1">
+        <MudItem xs="6">
+            <MudGrid Spacing="0">
+                <MudItem xs="6">
+                <MudPaper Class="pa-4 ma-2 card-body" Elevation="3" Style="background:#469549">
+                    <a href="/SubmissionDone">
+                        <h3>
+                            SUBMISSION DONE
+                        </h3>
+                        <p style="font-size:15px;">
+                            (Awaiting funder queries)
+                        </p>
+                        <h2 style="float:right;margin-top:-25px">@status22Count</h2>
+                    </a>
+                </MudPaper>
+
+
+                </MudItem>
+                <MudItem xs="6">
+                <MudPaper Class="pa-4 ma-2 card-body" Elevation="3" Style="background:#469549">
+                    <a href="/FunderQueries">
+                        <h3>
+                            FUNDER QUERIES
+                        </h3>
+                        <p style="font-size:15px;">
+                            (Awaiting Q-Completions)
+                        </p>
+                        <h2 style="float:right;margin-top:-25px">@status23Count</h2>
+                    </a>
+                </MudPaper>
+
+
+
+
+                </MudItem>
+            </MudGrid>
+        </MudItem>
+        <MudItem xs="6">
+            <MudGrid Spacing="1">
+                <MudItem xs="4" Style="border-left:1px solid;">
+
+                <MudPaper Class="pa-2 ma-1 card-body" Elevation="3" Style="background:#fd9700">
+                    <a href="/HCInstallation">
+                        <h3>
+                            HC
+                           
+                       </h3>
+                        <h3>
+                             AWAITING
+                       </h3>
+                        <span>&nbsp;</span>
+                        <h2 style="float:right;margin-top:-10px">@status14Count</h2>
+                        </a>
+                    </MudPaper>
+
+                </MudItem>
+                <MudItem xs="4" >
+
+                <MudPaper Class="pa-2 ma-1 card-body" Elevation="3" Style="background:#fd9700">
+                        <a href="/HCBooking">
+                        <h3>
+                            HC
+                           
+                       </h3>
+                        <h3>
+                             BOOKED
+                       </h3>
+                        <span>&nbsp;</span>
+                        <h2 style="float:right;margin-top:-10px">@status36Count</h2>
+                        </a>
+                    </MudPaper>
+
+                </MudItem>
+                <MudItem xs="4">
+
+                <MudPaper Class="pa-2 ma-1 card-body" Elevation="3" Style="background:#fd9700">
+                        <a href="/HCDone">
+                        <h3>
+                            HC
+
+                       </h3>
+                        <h3>
+                            DONE
+                       </h3>
+                    <span>&nbsp;</span>
+                    <h2 style="float:right;margin-top:-10px">@status37Count</h2>
+                    </a>
+                    </MudPaper>
+
+                </MudItem>
+            </MudGrid>
+        </MudItem>
+    </MudGrid>
+
+    @* /-----------Row 8 -------------/ *@
+    <MudGrid Spacing="1">
+        <MudItem xs="6">
+            <MudGrid Spacing="0">
+                <MudItem xs="6">
+
+                <MudPaper Class="pa-4 ma-2 card-body" Elevation="3" Style="background:#469549">
+                    <a href="/LodgementDone">
+                        <h3>
+                            LODGEMENT DONE
+                        </h3>
+                        <p style="font-size:15px;">
+                            (Awaiting Submission)
+                        </p>
+                        <h2 style="float:right;margin-top:-25px">@status21Count</h2>
+                    </a>
+                </MudPaper>
+
+                </MudItem>
+                <MudItem xs="6">
+
+                <MudPaper Class="pa-4 ma-2 card-body" Elevation="3" Style="background:#469549">
+                    <a href="/JobClosed">
+                        <h3>
+                            JOB CLOSED
+                       </h3>
+                        <p style="font-size:15px;">
+                            (Awaiting Payment)
+                        </p>
+                        <h2 style="float:right;margin-top:-25px">@status24Count</h2>
+                    </a>
+                </MudPaper>
+
+                </MudItem>
+            </MudGrid>
+        </MudItem>
+        <MudItem xs="6">
+            <MudGrid Spacing="1">
+                <MudItem xs="4" Style="border-left:1px solid;">
+
+                <MudPaper Class="pa-2 ma-1 card-body" Elevation="3" Style="background:#fd9700">
+                    <a href="/SolarPanelInstallation">
+                        <h3>
+                            SOLAR PV
+                            
+                       </h3>
+                        <h3>
+                            AWAITING
+                       </h3>
+                        <span>&nbsp;</span>
+                        <h2 style="float:right;margin-top:-10px">@status15Count</h2>
+                        </a>
+                    </MudPaper>
+
+                </MudItem>
+                <MudItem xs="4" >
+
+                <MudPaper Class="pa-2 ma-1 card-body" Elevation="3" Style="background:#fd9700">
+                    <a href="/SolarPVBooking">
+                        <h3>
+                            SOLAR PV
+
+                       </h3>
+                        <h3>
+                            BOOKED
+                       </h3>
+                        <span>&nbsp;</span>
+                        <h2 style="float:right;margin-top:-10px">@status38Count</h2>
+                        </a>
+                    </MudPaper>
+
+                </MudItem>
+                <MudItem xs="4">
+
+                <MudPaper Class="pa-2 ma-1 card-body" Elevation="3" Style="background:#fd9700">
+                    <a href="/SolarPVDone">
+                        <h3>
+                            SOLAR PV
+                       </h3>
+                        <h3>
+                            DONE
+                       </h3>
+                    <span>&nbsp;</span>
+                    <h2 style="float:right;margin-top:-10px">@status39Count</h2>
+                    </a>
+                    </MudPaper>
+
+                </MudItem>
+            </MudGrid>
+        </MudItem>
+    </MudGrid>
+    @* /-----------Row 9 -------------/ *@
+<MudGrid Spacing="1">
+    <MudItem xs="6">
+        <MudGrid Spacing="0">
+            <MudItem xs="6">
+
+                <MudPaper Class="pa-4 ma-2 card-body" Elevation="3" Style="background:#469549">
+                    <a href="/PaymentRecived">
+                        <h3>
+                            PART PAID JOB
+                       </h3>
+                        <p style="font-size:15px;">
+                            (Awaiting Full Payment)
+                        </p>
+                        <h2 style="float:right;margin-top:-25px">@status23Count</h2>
+                    </a>
+                </MudPaper>
+
+            </MudItem>
+            <MudItem xs="6">
+
+                <MudPaper Class="pa-4 ma-2 card-body" Elevation="3" Style="background:#469549">
+                    <a href="/FullPaidJob">
+                       
+                        <h3>
+                            FULL PAID JOB
+                        </h3>
+                        <p style="font-size:15px;">
+                            (Ready to store)
+                        </p>
+                        <h2 style="float:right;margin-top:-25px">@status50Count</h2>
+                    </a>
+                </MudPaper>
+
+            </MudItem>
+        </MudGrid>
+    </MudItem>
+    <MudItem xs="6">
+        <MudGrid Spacing="1">
+            <MudItem xs="4" Style="border-left:1px solid;">
+
+                <MudPaper Class="pa-2 ma-1 card-body" Elevation="3" Style="background:#fd9700">
+                    <a href="/ASHPInstallation">
+                        <h3>
+                            ASHP
+
+                       </h3>
+                        <h3>
+                            AWAITING
+                       </h3>
+                        <span>&nbsp;</span>
+                        <h2 style="float:right;margin-top:-10px">@status16Count</h2>
+                    </a>
+                </MudPaper>
+
+            </MudItem>
+            <MudItem xs="4">
+
+                <MudPaper Class="pa-2 ma-1 card-body" Elevation="3" Style="background:#fd9700">
+                    <a href="/ASHPBooking">
+                        <h3>
+                            ASHP
+
+                       </h3>
+                        <h3>
+                            BOOKED
+                       </h3>
+                        <span>&nbsp;</span>
+                        <h2 style="float:right;margin-top:-10px">@status40Count</h2>
+                    </a>
+                </MudPaper>
+
+            </MudItem>
+            <MudItem xs="4">
+
+                <MudPaper Class="pa-2 ma-1 card-body" Elevation="3" Style="background:#fd9700">
+                    <a href="/ASHPDone">
+                        <h3>
+                            ASHP
+                       </h3>
+                        <h3>
+                            DONE
+                       </h3>
+                        <span>&nbsp;</span>
+                        <h2 style="float:right;margin-top:-10px">@status41Count</h2>
+                    </a>
+                </MudPaper>
+
+            </MudItem>
+        </MudGrid>
+    </MudItem>
+</MudGrid>
+
+
+
+   </Authorized>
+    <NotAuthorized>
+            <MudAlert ShowCloseIcon="true" CloseIconClicked="Navi" Severity="Severity.Error" Variant="Variant.Filled">
+                <MudAlertTitle>Access Denied</MudAlertTitle>
+                <MudAlertDescription>You are not authorized to access this page. Please Login</MudAlertDescription>
+            </MudAlert>
+    </NotAuthorized>
+    <Authorizing>
+        <MudText>Loading.....</MudText>
+    </Authorizing>
+</AuthorizeView>
+
+
+<MudOverlay @bind-Visible="PopUpConfirm" DarkBackground="true" AutoClose="false">
+    <MudPopover Style="width:900px" Open="@PopUpConfirm" AnchorOrigin="Origin.CenterCenter" TransformOrigin="Origin.CenterCenter">
+        <MudCard>
+            <MudCardContent>
+                <MudText Typo="Typo.h6">Search</MudText>
+                   
+                <MudAutocomplete AutoFocus="true" Style="color:black" T="string"
+                                 Label="Search by RefNo or Address"
+                                 @bind-Value="selectedSearchItem"
+                                 SearchFunc="SearchItems"
+                                 ToStringFunc="@(item => item)"
+                                 CoerceText="true"
+                                 ResetValueOnEmptyText="true"
+                                 Clearable="true"
+                                 Dense="true">
+                </MudAutocomplete>
+               
+             
+            </MudCardContent>
+            <MudCardActions Style="justify-content:end">
+                <MudButton OnClick="closeConfirmation" Color="Color.Error">Cancel</MudButton>
+                <MudButton OnClick="OnGoButtonPressed" Color="Color.Success">Go</MudButton>
+            </MudCardActions>
+        </MudCard>
+    </MudPopover>
+</MudOverlay>
+}
+@code{
+    private bool isLoading = true;
+    public void Navi()
+    {
+        NavigationManager.NavigateTo("/", forceLoad: true);
+    }
+    private bool PopUpConfirm = false;
+    private string selectedSearchItem;
+    private List<SearchItem> items = new();
+    private Dictionary<string, int> searchItemDictionary = new();
+
+    public class SearchItem
+    {
+        public int Id { get; set; }
+        public string RefNo { get; set; }
+        public string AddressLine1 { get; set; }
+    }
+
+    private async Task LoadSearchItems()
+    {
+        using (var httpClient = new HttpClient())
+        {
+            try
+            {
+                items = await httpClient.GetFromJsonAsync<List<SearchItem>>(constant.GetRefAddress);
+                // Populate dictionary for mapping display text to Id
+                searchItemDictionary = items.ToDictionary(
+                    item => $"{item.RefNo} - {item.AddressLine1}",
+                    item => item.Id);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error fetching data from API: " + ex.Message);
+            }
+        }
+    }
+
+    private Task<IEnumerable<string>> SearchItems(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return Task.FromResult<IEnumerable<string>>(Array.Empty<string>());
+
+        var result = searchItemDictionary.Keys
+            .Where(key => key.Contains(value, StringComparison.OrdinalIgnoreCase));
+
+        return Task.FromResult(result);
+    }
+
+    private void OnGoButtonPressed()
+    {
+        try
+        {
+            if (selectedSearchItem != null)
+            {
+                if (searchItemDictionary.TryGetValue(selectedSearchItem, out int selectedId))
+                {
+                    if (selectedId != 0)
+                    {
+                        constant.FormId = selectedId;
+                        NavigationManager.NavigateTo("/job",true);
+                    }
+
+
+
+                }
+            }
+            else
+            {
+                Snackbar.Add("Please select a search item", Severity.Error);
+            }
+        }
+        catch(Exception ex)
+        {
+
+            Snackbar.Add("Error fetching data from API: " + ex.Message, Severity.Error);
+
+        }
+
+
+    }
+
+    private void ShowConfirmation() => PopUpConfirm = true;
+    private void closeConfirmation() => PopUpConfirm = false;
+
+
+
+
+
+    int count1 = 0;
+    public int status1Count = 0;
+    public int status2Count = 0;
+    public int status3Count = 0;
+    public int status4Count = 0;
+    public int status5Count = 0;
+    public int status6Count = 0;
+    public int status7Count = 0;
+    public int status8Count = 0;
+    public int status9Count = 0;
+    public int status10Count = 0;
+    public int status11Count = 0;
+    public int status12Count = 0;
+    public int status13Count = 0;
+    public int status14Count = 0;
+    public int status15Count = 0;
+    public int status16Count = 0;
+    public int status17Count = 0;
+    public int status18Count = 0;
+    public int status19Count = 0;
+    public int status20Count = 0;
+    public int status21Count = 0;
+    public int status22Count = 0;
+    public int status23Count = 0;
+    public int status24Count = 0;
+    public int status25Count = 0;
+    public int status26Count = 0;
+    public int status27Count = 0;
+    public int status28Count = 0;
+    public int status29Count = 0;
+    public int status30Count = 0;
+    public int status31Count = 0;
+    public int status32Count = 0;
+    public int status33Count = 0;
+    public int status34Count = 0;
+    public int status35Count = 0;
+    public int status36Count = 0;
+    public int status37Count = 0;
+    public int status38Count = 0;
+    public int status39Count = 0;
+    public int status40Count = 0;
+    public int status41Count = 0;
+    public int status42Count = 0;
+    public int status43Count = 0;
+    public int status44Count = 0;
+    public int status45Count = 0;
+    public int status46Count = 0; // asgn job to inpection
+    public int status47Count = 0;
+    public int status48Count = 0;
+    public int status49Count = 0;
+    public int status50Count = 0;
+
+
+
+
+
+
+
+
+    private string[] states = { "abc", "abc2" };
+    private async Task DataOfLogin()
+    {
+        constant.LoginUserName = await _localStorage.GetItemAsync<string>("username");
+        constant.LoginUserId = await _localStorage.GetItemAsync<int>("id");
+        constant.UserRole = await _localStorage.GetItemAsync<string>("role");
+    }
+    private bool _isCheckingAuth = true;
+    protected override async Task OnInitializedAsync()
+    {
+         DataOfLogin();
+        _isCheckingAuth = true;
+        var authState = await authStateProvider.GetAuthenticationStateAsync();
+       // _isCheckingAuth = authState.User.Identity.IsAuthenticated;
+        isLoading = false;
+        StateHasChanged();
+        AllFormsCount();
+        LoadRef();
+        await LoadSearchItems();
+       
+    }
+
+    private async Task AllFormsCount()
+    {
+        using (var httpClient = new HttpClient())
+            try
+            {
+                var response = await httpClient.GetAsync(constant.AllFormsCount);
+                if (response.IsSuccessStatusCode)
+                {
+
+
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                   // formList1 = JsonConvert.DeserializeObject<List<FormModel1>>(responseContent).ToList();
+
+
+
+
+                    var statusCounts = JsonConvert.DeserializeObject<Dictionary<string, int>>(responseContent);
+                    
+
+                    status1Count = statusCounts.ContainsKey("status1") ? statusCounts["status1"] : 0;
+                    status2Count = statusCounts.ContainsKey("status2") ? statusCounts["status2"] : 0;
+                    status3Count = statusCounts.ContainsKey("status3") ? statusCounts["status3"] : 0;
+                    status4Count = statusCounts.ContainsKey("status4") ? statusCounts["status4"] : 0;
+                    status5Count = statusCounts.ContainsKey("status5") ? statusCounts["status5"] : 0;
+                    status6Count = statusCounts.ContainsKey("status6") ? statusCounts["status6"] : 0;
+                    status7Count = statusCounts.ContainsKey("status7") ? statusCounts["status7"] : 0;
+                    status8Count = statusCounts.ContainsKey("status8") ? statusCounts["status8"] : 0;
+                    status9Count = statusCounts.ContainsKey("status9") ? statusCounts["status9"] : 0;
+                    status10Count = statusCounts.ContainsKey("status10") ? statusCounts["status10"] : 0;
+                    status11Count = statusCounts.ContainsKey("status11") ? statusCounts["status11"] : 0;
+                    status12Count = statusCounts.ContainsKey("status12") ? statusCounts["status12"] : 0;
+                    status13Count = statusCounts.ContainsKey("status13") ? statusCounts["status13"] : 0;
+                    status14Count = statusCounts.ContainsKey("status14") ? statusCounts["status14"] : 0;
+                    status15Count = statusCounts.ContainsKey("status15") ? statusCounts["status15"] : 0;
+                    status16Count = statusCounts.ContainsKey("status16") ? statusCounts["status16"] : 0;
+                    status17Count = statusCounts.ContainsKey("status17") ? statusCounts["status17"] : 0;
+                    status18Count = statusCounts.ContainsKey("status18") ? statusCounts["status18"] : 0;
+                    status19Count = statusCounts.ContainsKey("status19") ? statusCounts["status19"] : 0;
+                    status20Count = statusCounts.ContainsKey("status20") ? statusCounts["status20"] : 0;
+                    status21Count = statusCounts.ContainsKey("status21") ? statusCounts["status21"] : 0;
+                    status22Count = statusCounts.ContainsKey("status22") ? statusCounts["status22"] : 0;
+                    status23Count = statusCounts.ContainsKey("status23") ? statusCounts["status23"] : 0;
+                    status24Count = statusCounts.ContainsKey("status24") ? statusCounts["status24"] : 0;
+                    status25Count = statusCounts.ContainsKey("status25") ? statusCounts["status25"] : 0;
+                    status26Count = statusCounts.ContainsKey("status26") ? statusCounts["status26"] : 0;
+                    status27Count = statusCounts.ContainsKey("status27") ? statusCounts["status27"] : 0;
+                    status28Count = statusCounts.ContainsKey("status28") ? statusCounts["status28"] : 0;
+                    status29Count = statusCounts.ContainsKey("status29") ? statusCounts["status29"] : 0;
+                    status30Count = statusCounts.ContainsKey("status30") ? statusCounts["status30"] : 0;
+                    status31Count = statusCounts.ContainsKey("status31") ? statusCounts["status31"] : 0;
+                    status32Count = statusCounts.ContainsKey("status32") ? statusCounts["status32"] : 0;
+                    status33Count = statusCounts.ContainsKey("status33") ? statusCounts["status33"] : 0;
+                    status34Count = statusCounts.ContainsKey("status34") ? statusCounts["status34"] : 0;
+                    status35Count = statusCounts.ContainsKey("status35") ? statusCounts["status35"] : 0;
+                    status36Count = statusCounts.ContainsKey("status36") ? statusCounts["status36"] : 0;
+                    status37Count = statusCounts.ContainsKey("status37") ? statusCounts["status37"] : 0;
+                    status38Count = statusCounts.ContainsKey("status38") ? statusCounts["status38"] : 0;
+                    status39Count = statusCounts.ContainsKey("status39") ? statusCounts["status39"] : 0;
+                    status40Count = statusCounts.ContainsKey("status40") ? statusCounts["status40"] : 0;
+                    status41Count = statusCounts.ContainsKey("status41") ? statusCounts["status41"] : 0;
+                    status42Count = statusCounts.ContainsKey("status42") ? statusCounts["status42"] : 0;
+                    status43Count = statusCounts.ContainsKey("status43") ? statusCounts["status43"] : 0;
+                    status44Count = statusCounts.ContainsKey("status44") ? statusCounts["status44"] : 0;
+                    constant.status45Count = statusCounts.ContainsKey("status45") ? statusCounts["status45"] : 0; //TM qury
+                    status46Count = statusCounts.ContainsKey("status46") ? statusCounts["status46"] : 0;// asgn job to inpection
+                   status47Count = statusCounts.ContainsKey("status47") ? statusCounts["status47"] : 0;
+                   status48Count = statusCounts.ContainsKey("status48") ? statusCounts["status48"] : 0;//cancel job
+                   status49Count = statusCounts.ContainsKey("status49") ? statusCounts["status49"] : 0;//rejected job
+                   status50Count = statusCounts.ContainsKey("status50") ? statusCounts["status50"] : 0;//full paid job
+
+                    
+
+
+                    StateHasChanged();
+                }
+                else
+                {
+
+                    var errorMessage = await response.Content.ReadAsStringAsync();
+                    Snackbar.Add(errorMessage, Severity.Error);
+                }
+
+            }
+            catch (Exception e)
+            {
+
+                Snackbar.Add("Try Catch Error: " + e, Severity.Error);
+            }
+
+    }
+       private async Task LoadRef()
+    {
+        using (var httpClient = new HttpClient())
+            try
+            {
+                var response = await httpClient.GetAsync(constant.form1refno);
+                if (response.IsSuccessStatusCode)
+                {
+
+
+                    var jsonString = await response.Content.ReadAsStringAsync();
+                    states = JsonConvert.DeserializeObject<string[]>(jsonString);
+                    StateHasChanged();
+
+                }
+                else
+                {
+
+                    var errorMessage = await response.Content.ReadAsStringAsync();
+                    Snackbar.Add(errorMessage, Severity.Error);
+                }
+
+            }
+            catch (Exception e)
+            {
+
+                Snackbar.Add("Try Catch Error: " + e, Severity.Error);
+            }
+
+    }
+
+
+
+}

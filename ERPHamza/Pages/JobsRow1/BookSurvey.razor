@@ -1,0 +1,463 @@
+﻿@page "/booksurvey"
+@using System.Text.RegularExpressions
+@using System.ComponentModel.DataAnnotations
+@using ERPHamza.Data
+@using System.Net.Http.Json
+@using System.Text;
+@using Newtonsoft.Json
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+@inject IDialogService DialogService
+<style>
+    .mud-appbar .mud-toolbar-appbar {
+        background-color: #FFFFFF;
+    }
+
+
+
+    .mud-appbar .mud-toolbar-appbar {
+        background-color: #FFFFFF;
+    }
+</style>
+
+
+<AuthorizeView>
+    <Authorized>
+
+
+
+
+<center class="mt-5"><h2>Add New Job Record</h2></center>
+<div class="mt-2 mr-6 ml-6">
+
+    @if (form1List.Count > 0)
+{
+   
+
+
+    <MudForm @ref="form" @bind-IsValid="@success" @bind-Errors="@errors">
+
+        <div style="display:flex;">
+            <div style="width:50%; margin-right: 10px;">
+                    <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" @bind-Value="form1List[0].LeadGenerator" Label="Lead Generator " Required="true" RequiredError="LeadGenerator is required!" />
+            </div>
+                <div style="width:50%; margin-right: 10px;">
+                    <MudSelect Variant="Variant.Outlined" Margin="Margin.Dense" Label="Scheme" @bind-Value="form1List[0].Scheme" Required="true">
+                        <MudSelectItem T="string" Value="null" Label="Scheme" />
+                        @foreach (var sch in constant.scheme)
+                        {
+                            <MudSelectItem T="string" Value="sch" Label="@sch" />
+                        }
+                    </MudSelect>
+                </div>
+
+            <div style="width:50%; margin-right: 10px;">
+                    <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" @bind-Value="form1List[0].Surname" Label="Surname " Required="true" RequiredError="Surname is required!" />
+            </div>
+            <div style="width:50%;">
+                    <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" @bind-Value="form1List[0].Forename" Label="Forename" Required="true" RequiredError="Forename is required!" />
+            </div>
+        </div>
+
+
+        <div style="display:flex;" class="mt-3">
+            <div style="width:30%; margin-right: 10px;">
+                    <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" Label="Date of birth" @bind-Value="form1List[0].DOB" />
+            </div>
+            <div style="width:70%;">
+                    <MudTextField Margin="Margin.Dense" @bind-Value="form1List[0].PropertyNo" Variant="Variant.Outlined" Label="Property Name or Number" Required="true" RequiredError="Property Name or Number is required!" />
+            </div>
+        </div>
+
+
+
+        <div class="mt-3">
+            <MudTextField Margin="Margin.Dense" @bind-Value="form1List[0].AddressLine1" Variant="Variant.Outlined" Label="Address Line 1" Required="true" RequiredError="Address Line 1  is required!" />
+        </div>
+
+        <div class="mt-3">
+                <MudTextField Margin="Margin.Dense" @bind-Value="form1List[0].Town" Variant="Variant.Outlined" Label="Town" />
+        </div>
+
+        <div style="display:flex;" class="mt-3; mb-4; mt-2">
+
+                <div style="width:50%;margin-right: 10px;">
+                    <MudTextField Margin="Margin.Dense" @bind-Value="form1List[0].Postcode" Required="true" Variant="Variant.Outlined" Label="Post Code" RequiredError="Post Code is required!" />
+            </div>
+        </div>
+        <div class="mb-4">
+           
+                <h3>Addtional information</h3>
+        </div>
+            <div style="display:flex;" class="mt-3; mb-4">
+                <div style="width:50%; margin-right: 10px;">
+                    @if (tbmkloaded)
+                    {
+                        
+
+                        <MudSelect RequiredError="Survey Name is required!" Required="true" Variant="Variant.Outlined" Margin="Margin.Dense" Label="Surveyor" @bind-Value="selectedLdGen">
+                            <MudSelectItem T="string" Value="null"  />
+                            @foreach (var Generator in LdGenList)
+                            {
+                                <MudSelectItem T="string" Value="Generator" Label="@Generator" />
+                            }
+                        </MudSelect>
+                    }
+                </div>
+                <div style="width:50%;">
+                   @*  <MudTextField Margin="Margin.Dense" @bind-Value="form1List[0].SurveyDate"  Required="true" Variant="Variant.Outlined" Label="Survey Date" RequiredError="Survey Date is required!" /> *@
+                    <MudDatePicker Margin="Margin.Dense" Variant="Variant.Outlined" Editable="true" @bind-Date="sdate" DateFormat="dd/MM/yyyy" Placeholder="dd/MM/yyyy" Label="Survey Date" RequiredError="Survey Date is required!" />
+                </div>
+                <div style="width:50%;" class="ml-2">
+                    @* <MudTextField Margin="Margin.Dense"  Required="true" Label="Survey Time"  Variant="Variant.Outlined" @bind-Value="form1List[0].SurveyTime" RequiredError="Survey Time  is required!" Clearable /> *@
+                    <MudTimePicker PickerClosed="updateDT" Editable="true" AmPm="true" Margin="Margin.Dense" Required="true" Label="Survey Time" Variant="Variant.Outlined" @bind-Time="stime" RequiredError="Survey Time  is required!" Clearable />
+                   
+                </div>
+                <div style="width:50%;" class="ml-2">
+                     <MudSelect Variant="Variant.Outlined" Margin="Margin.Dense" Label="Tenure" @bind-Value="selectedtenure">
+                         <MudSelectItem T="string" Label="Tenure" />
+                         @foreach (var sch in constant.tenure)
+                        {
+                            <MudSelectItem T="string" Value="sch" Label="@sch" />
+                        }
+                    </MudSelect>
+                </div>
+            </div>
+
+    </MudForm>
+
+
+    }
+
+
+</div>
+
+
+    @if (form1List.Count > 0)
+{
+    <center class="mt-2 mb-4">
+        <MudButton @onclick="goback" Variant="Variant.Filled" Color="Color.Error">Cancel</MudButton>
+        <MudButton Disabled="@_processing" @onclick="AddData" Variant="Variant.Filled" Color="Color.Success" Style="width:10%;">
+            @if (_processing)
+            {
+                <MudProgressCircular Class
+                ="ms-n1" Size
+                ="Size.Small" Indeterminate
+                ="true" /> 
+                <MudText Class
+                ="ms-2">Processing</MudText>
+            }
+            else
+            {
+                <MudText>Save </MudText>
+            }
+        </MudButton>
+
+    </center>
+}
+
+    </Authorized>
+    <NotAuthorized>
+        <MudAlert ShowCloseIcon="true" CloseIconClicked="Navi" Severity="Severity.Error" Variant="Variant.Filled">
+            <MudAlertTitle>Access Denied</MudAlertTitle>
+            <MudAlertDescription>You are not authorized to access this page. Please Login</MudAlertDescription>
+        </MudAlert>
+        </NotAuthorized>
+</AuthorizeView>
+
+@code{
+    public void Navi()
+    {
+        NavigationManager.NavigateTo("/", forceLoad: true);
+    }
+    public void updateDT()
+    {
+        // Update SurveyDate
+        if (sdate.HasValue)
+        {
+            form1List[0].SurveyDate = sdate.Value.ToString("dd/MM/yyyy");
+        }
+        else
+        {
+            form1List[0].SurveyDate = "No date selected";
+        }
+
+        // Update SurveyTime
+        if (stime.HasValue)
+        {
+            // Convert TimeSpan to DateTime to include AM/PM
+            DateTime time = DateTime.Today.Add(stime.Value);
+            form1List[0].SurveyTime = time.ToString("hh:mm tt");
+        }
+        else
+        {
+            form1List[0].SurveyTime = "No time selected";
+        }
+
+        // Notify the UI to refresh
+        StateHasChanged();
+    }
+
+
+
+    private string selectedsScheme;
+    private string selectedsTitle;
+    private string selectedtenure;
+
+    private string selectedLdGen;
+    private List<string> LdGenList;
+    bool tbmkloaded = false;
+    public string  mac2;
+    private bool resetValueOnEmptyText;
+    private bool coerceText;
+    private bool coerceValue;
+    public string value2;
+    public string Uenter = "";
+    //OnKeyPress="HandleKeyPressAsync" KeyboardEventArgs args
+    // private async Task HandleKeyPressAsync()
+    // {
+    //         Uenter = value2;
+    //         LoadForm1Data();
+    // }
+
+
+    private List<JobForm1> form1List = new List<JobForm1>();
+    JobForm1 model = new JobForm1();
+    public class JobForm1
+    {
+        public int Id { get; set; }
+        public string LeadGenerator { get; set; }
+        public string Surname { get; set; }
+        public string Forename { get; set; }
+        public string DOB { get; set; }
+        public string PropertyNo { get; set; }
+        public string AddressLine1 { get; set; }
+
+        public string Town { get; set; }
+        public string Scheme { get; set; }
+        public string Postcode { get; set; }
+        public string RefNo { get; set; }
+        public string SurveyName { get; set; }
+        public string SurveyDate { get; set; }
+        public string SurveyTime { get; set; }
+        public int Status { get; set; }
+        public string Tenure { get; set; }
+       
+
+
+
+
+    }
+    protected override void OnInitialized()
+    {
+        LoadRef();
+        Uenter = constant.refno;
+        LoadForm1Data();
+        GetMemberList();
+
+    }
+
+    private async Task GetMemberList()
+    {
+        var client = new HttpClient();
+        var response = await client.GetAsync(constant.GetSurveyorName);
+        if (response.IsSuccessStatusCode)
+        {
+            var content = await response.Content.ReadAsStringAsync();
+            LdGenList = JsonConvert.DeserializeObject<List<string>>(content);
+
+            tbmkloaded = true;
+            StateHasChanged();
+        }
+        else
+        {
+            var errorMessage = await response.Content.ReadAsStringAsync();
+            Snackbar.Add(errorMessage, Severity.Error);
+        }
+    }
+
+
+
+
+
+
+
+
+
+    DateTime? date = DateTime.Today;
+
+    private bool _processing = false;
+    private bool success = false;
+    string[] errors = { };
+    MudTextField<string> pwField1;
+    private MudForm form;
+
+
+
+    public string uniq = "";
+    public DateTime? sdate;
+    public TimeSpan? stime;
+
+
+
+    private string[] states = { "abc", "abc2" };
+    private async Task<IEnumerable<string>> Search2(string value)
+    {
+        // In real life use an asynchronous function for fetching data from an api.
+        
+
+        // if text is null or empty, don't return values (drop-down will not open)
+        if (string.IsNullOrEmpty(value))
+            return new string[0];
+        return  states.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+    }
+
+    private async Task LoadForm1Data()
+    {
+        using (var httpClient = new HttpClient())
+            try
+            {
+                var data = new
+                {
+
+                    RefNo = constant.refno
+            };
+                string jsonData = JsonConvert.SerializeObject(data);
+                var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+                var response = await httpClient.PostAsync(constant.FindByRefNo, content);
+                if (response.IsSuccessStatusCode)
+                {
+
+                        var responseContent = await response.Content.ReadAsStringAsync();
+                        var form1 = JsonConvert.DeserializeObject<JobForm1>(responseContent);
+                        form1List.Clear(); // Clear the existing list
+                        form1List.Add(form1); // Add the deserialized object to the list
+
+                    StateHasChanged();
+                }
+                else
+                {
+
+                    var errorMessage = await response.Content.ReadAsStringAsync();
+                    Snackbar.Add(errorMessage, Severity.Error);
+                }
+
+            }
+            catch (Exception e)
+            {
+
+                Snackbar.Add("Try Catch Error: " + e, Severity.Error);
+            }
+
+    }
+    private async Task LoadRef()
+    {
+        using (var httpClient = new HttpClient())
+            try
+            {
+                var response = await httpClient.GetAsync(constant.form1refno);
+                if (response.IsSuccessStatusCode)
+                {
+
+
+                    var jsonString = await response.Content.ReadAsStringAsync();
+                    states = JsonConvert.DeserializeObject<string[]>(jsonString);
+                    StateHasChanged();
+
+                }
+                else
+                {
+
+                    var errorMessage = await response.Content.ReadAsStringAsync();
+                    Snackbar.Add(errorMessage, Severity.Error);
+                }
+
+            }
+            catch (Exception e)
+            {
+
+                Snackbar.Add("Try Catch Error: " + e, Severity.Error);
+            }
+
+    }
+
+
+
+
+
+
+
+    private async Task AddData()
+    {
+
+
+
+
+        form.Validate();
+
+        if (form.IsValid)
+        {
+            _processing = true;
+            var data = new
+            {
+                Id=form1List[0].Id,
+                LeadGenerator = form1List[0].LeadGenerator,
+                RefNo = form1List[0].RefNo,
+                Surname = selectedsTitle + " " + form1List[0].Surname,
+                Forename = form1List[0].Forename,
+                DOB = form1List[0].DOB,
+                PropertyNo = form1List[0].PropertyNo,
+                AddressLine1 = form1List[0].AddressLine1,
+                Town = form1List[0].Town,
+                Scheme = form1List[0].Scheme,
+                Postcode = form1List[0].Postcode,
+
+                SurveyName = selectedLdGen,
+                SurveyDate = form1List[0].SurveyDate,
+                SurveyTime = form1List[0].SurveyTime,
+                Tenure = selectedtenure,
+                CreateBy=constant.LoginUserName,
+                Status = 2
+            };
+            try
+            {
+                using var httpClient = new HttpClient();
+                string jsonData = JsonConvert.SerializeObject(data);
+                var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+                var response = await httpClient.PostAsync(constant.UpdateJob, content);
+
+                if (response.IsSuccessStatusCode)
+                {
+
+                    success = true;
+                    _processing = false;
+                    Snackbar.Add("Data Saved", Severity.Success);
+                    NavigationManager.NavigateTo("/index", forceLoad: true);
+                }
+                else
+                {
+                    // Handle error response
+                    success = false;
+                    _processing = false;
+                    var errorMessage = await response.Content.ReadAsStringAsync();
+                    Snackbar.Add(errorMessage, Severity.Error);
+                }
+            }
+            catch (Exception e)
+            {
+                Snackbar.Add("Error: Call To Developer", Severity.Error);
+            }
+
+        }
+
+
+
+    }
+
+    public void goback()
+    {
+        NavigationManager.NavigateTo("/index", forceLoad: true);
+
+    }
+
+}

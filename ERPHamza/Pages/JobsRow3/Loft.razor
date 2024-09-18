@@ -1,0 +1,342 @@
+﻿<PageTitle>Loft Insallations</PageTitle>
+@page "/Loft"
+@inject HttpClient Http
+@using System.Text.RegularExpressions
+@using System.ComponentModel.DataAnnotations
+@using ERPHamza.Data
+@using System.Net.Http.Json
+@using System.Text;
+@using ERPHamza.Data.MyClasses
+@using Newtonsoft.Json
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+@inject IDialogService DialogService
+<style>
+    .mud-appbar .mud-toolbar-appbar {
+        background-color: #FFFFFF;
+    }
+
+
+
+    .mud-appbar .mud-toolbar-appbar {
+        background-color: #FFFFFF;
+    }
+
+    .ex3 {
+        height: 500px;
+        overflow: auto;
+    }
+</style>
+
+<div class="card-header mt-2">
+    <h5>Loft Insallations</h5>
+</div>
+<AuthorizeView>
+    <Authorized>
+
+@if (loading)
+{
+    <center style="margin-top:5%;">
+        <img src="macGif.gif" alt="Loading" width="30" height="30">
+    </center>
+
+}
+else
+{
+    <table class="table mt-8 mr-4 ml-4">
+        <thead>
+            <tr>
+                <th class="col">#</th>
+                <th class="col">RefNo</th>
+                <th class="col">Address</th>
+                <th class="col" >Action</th>
+            </tr>
+        </thead>
+
+        @if (formList.Count > 0)
+        {
+            <tbody>
+                @foreach (var result in formList)
+                {
+
+                    <tr>
+                        <th scope="row">@(formList.IndexOf(result) + 1)</th>
+                        <td>@result.JobFormRecord.RefNo</td>
+                        <td>@result.JobFormRecord.AddressLine1</td>
+                        <td>
+
+                             <MudButton OnClick="@((e) => GoToJob(result))" Variant="Variant.Outlined" Color="Color.Success" style="margin-right:50px">Job Details</MudButton>
+
+                            @*@if (result.JobFormRecord.Status == 29)
+                            {
+                                <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="@((e) => OpenDialog3(maxWidth,result))">Installation Done</MudButton>
+                            }
+                            else
+                            {
+                                <MudButton Variant="Variant.Outlined" Color="Color.Success" OnClick="@((e) => OpenDialog2(maxWidth,result))">Book Installation</MudButton>
+                            }*@
+
+                            <MudButton Variant="Variant.Outlined" Color="Color.Success" OnClick="@((e) => OpenDialog2(maxWidth,result))">Book Installation</MudButton>
+                          @*   <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.List" Color="Color.Primary" OnClick="@((e) => OpenOverlayCheckList4(result))">Check List</MudButton> *@
+                          
+                        </td>
+                    </tr>
+
+                }
+            </tbody>
+        }
+
+
+
+
+    </table>
+
+    <MudOverlay @bind-Visible="MudOverlayCheckList4" DarkBackground="true" AutoClose="true">
+        <MudPopover TransformOrigin="Origin.CenterCenter" AnchorOrigin="Origin.BottomCenter" Open="@MudOverlayCheckList4">
+            <MudCard Class="ex3">
+
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6">LOFT CHECKLIST</MudText>
+                    </CardHeaderContent>
+                    <CardHeaderActions>
+                        <MudIconButton OnClick="CloseOverlayCheckList4" Icon="@Icons.Material.Filled.Close" Color="Color.Default" />
+                    </CardHeaderActions>
+                </MudCardHeader>
+
+                <MudContainer>
+                    <MudGrid>
+                        <MudItem xs="12" sm="6" md="6">
+                            @foreach (var item in Checklists.Take(Checklists.Count() / 2))
+                            {
+                                <MudPaper Class="pa-4 mb-4 d-flex align-items-center justify-content-between">
+                                    <MudText Class="mr-2">@item.CheckList</MudText>
+                                    <MudSelect T="int" @bind-Value="@item.SelectedValue" Class="ml-auto">
+                                        <MudSelectItem Value="1">✅</MudSelectItem>
+                                        <MudSelectItem Value="2">NA</MudSelectItem>
+                                        <MudSelectItem Value="3">❌</MudSelectItem>
+                                    </MudSelect>
+                                </MudPaper>
+                            }
+                        </MudItem>
+                        <MudItem xs="12" sm="6" md="6">
+                            @foreach (var item in Checklists.Skip(Checklists.Count() / 2))
+                            {
+                                <MudPaper Class="pa-4 mb-4 d-flex align-items-center justify-content-between">
+                                    <MudText Class="mr-2">@item.CheckList</MudText>
+                                    <MudSelect T="int" @bind-Value="@item.SelectedValue" Label="" Class="ml-auto">
+                                        <MudSelectItem Value="1">✅</MudSelectItem>
+                                        <MudSelectItem Value="2">NA</MudSelectItem>
+                                        <MudSelectItem Value="3">❌</MudSelectItem>
+                                    </MudSelect>
+                                </MudPaper>
+                            }
+                        </MudItem>
+                    </MudGrid>
+                </MudContainer>
+
+
+
+                <MudCardActions Style="justify-content:end">
+                    <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="CloseOverlayCheckList4">Cancel</MudButton>
+                    &nbsp;<MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="SubmitChecklists">Save</MudButton>
+                </MudCardActions>
+            </MudCard>
+
+        </MudPopover>
+    </MudOverlay>
+
+
+
+    @if (formList.Count == 0)
+    {
+        <img class="center" style="height:300px;width:300px; display: block; margin-left: auto;   margin-right: auto;" src="nodata.gif">
+    }
+}
+    </Authorized>
+    <NotAuthorized>
+        <MudAlert ShowCloseIcon="true" CloseIconClicked="Navi" Severity="Severity.Error" Variant="Variant.Filled">
+            <MudAlertTitle>Access Denied</MudAlertTitle>
+            <MudAlertDescription>You are not authorized to access this page. Please Login</MudAlertDescription>
+        </MudAlert>
+        </NotAuthorized>
+</AuthorizeView>
+@code{public void GoToJob(FormModel result){constant.FormId = result.JobFormRecord.Id;NavigationManager.NavigateTo("/job", true);}
+    public void Navi()
+    {
+        NavigationManager.NavigateTo("/", forceLoad: true);
+    }
+    bool loading = true;
+    bool MudOverlayCheckList4 = false;
+    public void OpenOverlayCheckList4(FormModel result)
+    {
+        constant.FormId = result.JobFormRecord.Id;
+        MudOverlayCheckList4 = true;
+        StateHasChanged();
+    }
+    public void CloseOverlayCheckList4()
+    {
+        MudOverlayCheckList4 = false;
+        StateHasChanged();
+    }
+    public int ID = 0;
+    public string refno = "";
+
+    private List<FormModel> formList = new List<FormModel>();
+    public class JobFormRecord
+    {
+        public int Id { get; set; }
+        public string RefNo { get; set; }
+
+        public string AddressLine1 { get; set; }
+
+        public string SurveyName { get; set; }
+
+        public int Status { get; set; }
+
+    }
+
+    public class FormModel
+    {
+        public int Id { get; set; }
+        public int FormId { get; set; }
+        public int Status { get; set; }
+        public JobFormRecord JobFormRecord { get; set; }
+    }
+
+
+
+
+    protected override void OnInitialized()
+    {
+
+        //base.OnInitialized();
+
+        Form1BySat9();
+        GetCheckList();
+    }
+
+    private async Task Form1BySat9()
+    {
+        using (var httpClient = new HttpClient())
+            try
+            {
+                var response = await httpClient.GetAsync(constant.Form1BySat9);
+                if (response.IsSuccessStatusCode)
+                {
+
+
+                    var jsonString = await response.Content.ReadAsStringAsync();
+                    formList = JsonConvert.DeserializeObject<List<FormModel>>(jsonString).ToList();
+                    loading = false;
+                    StateHasChanged();
+                }
+                else
+                {
+                    loading = false;
+                    var errorMessage = await response.Content.ReadAsStringAsync();
+                    Snackbar.Add(errorMessage, Severity.Error);
+                }
+
+            }
+            catch (Exception e)
+            {
+
+                Snackbar.Add("Try Catch Error: " + e, Severity.Error);
+            }
+
+    }
+
+
+
+    DialogOptions maxWidth = new DialogOptions() { MaxWidth = MaxWidth.Medium, FullWidth = true, CloseButton = true };
+
+    private void OpenDialog(DialogOptions options, FormModel result)
+    {
+        constant.FormId = result.FormId;
+        constant.refno = result.JobFormRecord.RefNo;
+        DialogService.Show<ViewJobDetailsDialog>("Custom Options Dialog", options);
+    }
+    private void OpenDialog3(DialogOptions options, FormModel result)
+    {
+
+        constant.FormId = result.JobFormRecord.Id;
+        DialogService.Show<LoftConfirmDialog3>("Confirmation", options);
+    }
+
+    private void OpenDialog2(DialogOptions options, FormModel result)
+    {
+
+        constant.FormId = result.JobFormRecord.Id;
+        DialogService.Show<LoftDialog>("Custom Options Dialog", options);
+    }
+
+    //checkList
+    public class ChecklistItem
+    {
+        public int Id { get; set; }
+        public string CheckList { get; set; }
+        public int SelectedValue { get; set; }
+    }
+    public class SelectedChecklistItem
+    {
+        public int Id { get; set; }
+        public int SelectedValue { get; set; }
+        public int FormId { get; set; }
+    }
+    private List<ChecklistItem> Checklists = new List<ChecklistItem>();
+
+    private async Task GetCheckList()
+    {
+        Checklists = await Http.GetFromJsonAsync<List<ChecklistItem>>(constant.GetCheckList4);
+    }
+    private async Task SubmitChecklists()
+    {
+
+        var selectedChecklists = Checklists
+            .Where(c => c.SelectedValue == 1 || c.SelectedValue == 2 || c.SelectedValue == 3)
+            .Select(c => new SelectedChecklistItem { Id = c.Id, SelectedValue = c.SelectedValue, FormId = constant.FormId })
+            .ToList();
+        // string jsonData = JsonConvert.SerializeObject(selectedChecklists);
+        if (selectedChecklists.Count < 20)
+        {
+            Snackbar.Add("All Check List are Required!", Severity.Error);
+            return;
+        }
+        else
+        {
+            try
+            {
+                using var httpClient = new HttpClient();
+                string jsonData = JsonConvert.SerializeObject(selectedChecklists);
+                var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+                var response = await httpClient.PostAsync(constant.AddCheckLists, content);
+
+                if (response.IsSuccessStatusCode)
+                {
+
+                    MudOverlayCheckList4 = false;
+                    StateHasChanged();
+                    Snackbar.Add("Check List Saved.", Severity.Success);
+
+                }
+                else
+                {
+
+                    var errorMessage = await response.Content.ReadAsStringAsync();
+                    Snackbar.Add(errorMessage, Severity.Error);
+                }
+            }
+            catch (Exception e)
+            {
+                Snackbar.Add("Error: Call To Developer", Severity.Error);
+            }
+
+        }
+    }
+
+
+
+
+}
+
