@@ -61,6 +61,15 @@
                 </MudSelect>
                 </div>
                 <div class="col">
+                        <MudSelect Variant="Variant.Outlined" Margin="Margin.Dense" Label="Job Type" @bind-Value="selectedJobType" Required="true">
+                            <MudSelectItem T="string" Value="null" Label="Select Job Type" />
+                            @foreach (var jobType in constant.jobTypes)
+                            {
+                                <MudSelectItem T="string" Value="jobType" Label ="@jobType"/>
+                            }
+                        </MudSelect>
+                </div>
+                <div class="col">
                 <MudSelect Variant="Variant.Outlined" Margin="Margin.Dense" Label="Title" @bind-Value="selectedsTitle" Required="true">
                     <MudSelectItem T="string"  />
                     @foreach (var til in constant.title)
@@ -152,18 +161,19 @@
         </MudAlert>
         </NotAuthorized>
 </AuthorizeView>
-@code{
+    @code{
 
 
     private string selectedsScheme;
 
     private string selectedsTitle;
+    private string selectedJobType;
 
 
 
     public void Navi()
     {
-       NavigationManager.NavigateTo("/", forceLoad: true);
+        NavigationManager.NavigateTo("/", forceLoad: true);
     }
 
 
@@ -248,6 +258,7 @@
                 LeadGenerator = selectedLdGen,
                 RefNo = model.PropertyNo + model.Postcode,
                 Scheme = selectedsScheme,
+                JobType = selectedJobType,
                 Surname = model.Surname,
                 Forename = selectedsTitle + " " + model.Forename,
                 DOB = model.DOB,

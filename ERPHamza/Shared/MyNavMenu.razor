@@ -4,12 +4,23 @@
     <MudNavLink Href="/index" Match="NavLinkMatch.All">
         <img src="https://energysaviour.software/bgLogo.png" width="100%" height="48" />
     </MudNavLink>
+    <MudNavLink Href="/index" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.SpaceDashboard" Title="Dashboard">Dashboard</MudNavLink>
     <MudNavLink Href="#" Match="NavLinkMatch.Prefix"></MudNavLink>
-    <MudNavGroup Icon="@Icons.Material.Filled.HomeRepairService" Title="Jobs">
-        <MudNavLink Href="/alljob" Match="NavLinkMatch.Prefix">All Jobs</MudNavLink>
-       @*  <MudNavLink Href="/FullPaidJob" Match="NavLinkMatch.Prefix">Arcived Jobs</MudNavLink> *@
-        <MudNavLink Href="/CancelJobs" Match="NavLinkMatch.Prefix">Cancelled Jobs</MudNavLink>
-        <MudNavLink Href="/RejectedJobs"  Match="NavLinkMatch.Prefix">Rejected Jobs</MudNavLink>
+    <MudNavGroup Icon="@Icons.Material.Filled.HomeRepairService" Title="All Jobs">
+        <MudNavLink Href="/alljob" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.TaskAlt" Title="Completed Jobs">
+            Completed Jobs
+        </MudNavLink>
+
+        @* <MudNavLink Href="/FullPaidJob" Match="NavLinkMatch.Prefix">Arcived Jobs</MudNavLink> *@
+
+        <MudNavLink Href="/CancelJobs" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Cancel" Title="Cancelled Jobs">
+            Cancelled Jobs
+        </MudNavLink>
+
+        <MudNavLink Href="/RejectedJobs" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.ThumbDown" Title="Rejected Jobs">
+            Rejected Jobs
+        </MudNavLink>
+
     </MudNavGroup>
 
     @*     <MudNavGroup Title="Settings" >
@@ -17,22 +28,30 @@
     <MudNavLink Href="/security"  Match="NavLinkMatch.Prefix">Security</MudNavLink>
     </MudNavGroup> *@
 
-    <MudNavLink Href="/AssignToInspection" Match="NavLinkMatch.Prefix">Inspection reports</MudNavLink>
+    <MudNavLink Href="/AssignToInspection" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AssignmentTurnedIn" Title="Inspection reports">Inspection reports</MudNavLink>
+
+   <MudNavLink Href="/JobStages" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.WorkOutline" Title="Job Queries">
+    Job Queries
+</MudNavLink>
+
+<MudNavLink Href="/TMQ" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.QuestionAnswer" Title="TM Queries">
+    TM Queries
+</MudNavLink>
 
 
-    <MudNavGroup Icon="@Icons.Material.Filled.QueryStats" Title="Queries stages">
+   @*  <MudNavGroup Icon="@Icons.Material.Filled.QueryStats" Title="Queries stages">
         <MudNavLink Href="/JobStages" Match="NavLinkMatch.Prefix">Job Queries</MudNavLink>
        @*  <MudNavLink Href="#" Match="NavLinkMatch.Prefix">Funder Queries</MudNavLink> *@
-        @if (constant.status45Count > 0)
+        @* @if (constant.status45Count > 0)
         {
             <MudNavLink Href="/TMQ" Match="NavLinkMatch.Prefix"><MudBadge Content="@constant.status45Count" Overlap="true" Color="Color.Success">TM Queries</MudBadge></MudNavLink>
         }
         else
         {
             <MudNavLink Match="NavLinkMatch.Prefix">TM Queries</MudNavLink>
-        }
+        } *@
 
-    </MudNavGroup>
+    @* </MudNavGroup> *@
 
 
     <MudNavLink Href="/LeadGenerator" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AutoGraph">Lead gen reports</MudNavLink>
@@ -51,15 +70,15 @@
     </MudNavGroup>
 
    
-    <MudNavGroup Icon="@Icons.Material.Filled.People" Title="Contractors">
-       
-
-
-        <MudNavLink  Href="/Member" Match="NavLinkMatch.Prefix">Add Member</MudNavLink>
-        <MudNavLink Href="/ViewMember" Match="NavLinkMatch.Prefix">View Member</MudNavLink>
-
-
+    <MudNavGroup Icon="@Icons.Material.Filled.People" Title="Worker Portal">
+        <MudNavLink Href="/Member" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.PersonAdd" Title="Add Worker">
+            Add Worker
+        </MudNavLink>
+        <MudNavLink Href="/ViewMember" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.RemoveRedEye" Title="View Worker">
+            View Worker
+        </MudNavLink>
     </MudNavGroup>
+
     @if (constant.UserRole == "Admin")
     {
         <MudNavGroup Icon="@Icons.Material.Filled.AdminPanelSettings" Title="User Portal">

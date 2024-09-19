@@ -7,16 +7,16 @@ namespace ERPHamza.Data
     {
 
         //public static string BaseUrl = "http://localhost/ERP_Hamza_API/api/";
-        //public static string BaseUrl = "https://localhost:44364/api/";
+        public static string BaseUrl = "https://localhost:44364/api/";
 
-      public static string BaseUrl = "https://api.energysaviour.software/api/";
-        
+       // public static string BaseUrl = "https://api.energysaviour.software/api/";
+
         public static string Login = BaseUrl + "Auth/login";
         public static string Register = BaseUrl + "Auth/Register";
 
         public static string Addform1 = BaseUrl + "job/AddJob";
 
-        
+
         public static string UpdateJob = BaseUrl + "job/UpdateJob"; //update status 2 
         public static string UpdateJobBooked = BaseUrl + "job/UpdateJobBooked"; //update status to 3
         public static string UpdateJobBooked4 = BaseUrl + "job/UpdateJobTo4"; //update status to 4
@@ -44,13 +44,13 @@ namespace ERPHamza.Data
         public static string UpdateCHKL = BaseUrl + "job/UpdateCHKL"; //
         public static string AutoIdsDelete = BaseUrl + "job/AutoIdsDelete"; //
         public static string UpdateJobFunderName2 = BaseUrl + "job/UpdateJobFunderName2"; //
-        
-       
-        
-        
-        public static string AddFQ = BaseUrl + "FunderQ/AddFQ"; 
-        public static string GetFQList = BaseUrl + "FunderQ/GetFQList"; 
-        public static string FQUpdateStatus = BaseUrl + "FunderQ/UpdateStatus"; 
+
+
+
+
+        public static string AddFQ = BaseUrl + "FunderQ/AddFQ";
+        public static string GetFQList = BaseUrl + "FunderQ/GetFQList";
+        public static string FQUpdateStatus = BaseUrl + "FunderQ/UpdateStatus";
         public static string UpdateStatusToDone = BaseUrl + "FunderQ/UpdateStatusToDone";
         public static string SaveFQItemsList = BaseUrl + "FunderQ/SaveFQItemsList";
         public static string SaveTMQItemsList = BaseUrl + "job/SaveTMQItemsList"; //
@@ -61,7 +61,7 @@ namespace ERPHamza.Data
 
         #region Member APIs
         public static string SaveMemeber = BaseUrl + "Member/AddMember"; //update status to 24
-        public static string GetMemberListByType = BaseUrl + "Member/GetMemberListByType"; 
+        public static string GetMemberListByType = BaseUrl + "Member/GetMemberListByType";
         public static string GetMemberNamesByType = BaseUrl + "Member/GetMemberNamesByType";
         #endregion
 
@@ -83,11 +83,11 @@ namespace ERPHamza.Data
 
         #region JobStages
         public static string GetCheckListStatus = BaseUrl + "JobStages/GetCheckListStatus"; //get by status 3
-        public static string UpdateCheckList = BaseUrl + "JobStages/UpdateCheckList"; 
+        public static string UpdateCheckList = BaseUrl + "JobStages/UpdateCheckList";
         #endregion
 
         #region SideBar APIs
-        public static string FindByLeadGen = BaseUrl + "SideBar/FindByLeadGen"; 
+        public static string FindByLeadGen = BaseUrl + "SideBar/FindByLeadGen";
         public static string FindByPassInstaName = BaseUrl + "SideBar/FindByPassInstaName";
         public static string FindByLoftName = BaseUrl + "SideBar/FindByLoftName";
         public static string FindAshipName = BaseUrl + "SideBar/FindAshipName";
@@ -99,11 +99,12 @@ namespace ERPHamza.Data
         public static string FindBySolarName = BaseUrl + "SideBar/FindBySolarName";
         public static string GetJobData = BaseUrl + "SideBar/GetJobData";//by id
         public static string UpdateJobNote = BaseUrl + "SideBar/UpdateJobNote";//by id
+        public static string AddJobNote = BaseUrl + "SideBar/AddJobNote";//by id
         #endregion
 
         #region User Portal
         public static string AddRights = BaseUrl + "UserPortal/AddRights";
-        
+
         #endregion
 
 
@@ -149,7 +150,7 @@ namespace ERPHamza.Data
         public static string AssignToInspection = BaseUrl + "job/AssignToInspection";
         public static string UpdateAssignedJobStatus = BaseUrl + "job/UpdateAssignedJobStatus";
 
-       public static string GetMemberList = BaseUrl + "Member/GetMemberList";
+        public static string GetMemberList = BaseUrl + "Member/GetMemberList";
         public static string GetLDGen = BaseUrl + "Member/GetLDGen";
         public static string GetMeasure = BaseUrl + "Member/GetMeasure";
         public static string GetSurveyorName = BaseUrl + "Member/GetSurveyorName";
@@ -241,24 +242,28 @@ namespace ERPHamza.Data
         public static DateTime DateOnly;
         public static string OnlyTime;
         public static string refno;
-        public static int FormId=0;
+        public static int FormId = 0;
         public static int status45Count = 0;
         public static bool success = false;
-       
+
 
 
 
 
 
         public static List<string> title = new List<string> { "Mr", "Mrs", "Ms", "Miss" };
-        public static List<string> month = new List<string> { "January", "February", "March", "April", "May", "June","July", "August", "September", "October", "November", "December" };
+        public static List<string> month = new List<string> { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" };
         public static List<string> inspection = new List<string> { "C1", "C2", "C3" };
         public static List<string> tenure = new List<string> { "Owner Occupied", "Tenant" };
-        public static List<string> scheme = new List<string> { "ECO4 DM","ECO4 CHB","ECO4 Flex","GBIS GE","GBIS LI","HUG","LAD","SHDF" };
+        public static List<string> scheme = new List<string> { "ECO4/Main", "ECO4/SM", "ECO4 CHB", "ECO4 Flex", "ECO3/BB", "GBIS GE", "GBIS LI", "HUG", "LAD", "SHDF" };
         public static List<string> members = new List<string> { "Lead Generator", "Surveyor", "PAS Installer",
     "LOFT Installer","RIR Installer","EWI Installer","IWI Installer","Boiler Installer","HC Installer","Solar Pv Installer","ASHP Installer",
     "Retrifit Assessor","Retrofit Coordinator","Funder Name","Measure","Company"};
-		
+        public static List<string> jobTypes = new List<string> { "ASHP","B/UP","B/BR","EWI","FTCH","HC/S","HC/N",
+            "IWI","RIR","Loft","S/PV","PRV"
+        };
 
-	}
+
+
+    }
 }

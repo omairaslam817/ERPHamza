@@ -61,7 +61,7 @@ else
                         <td>@result.JobFormRecord.AddressLine1</td>
                         <td>
                              <MudButton OnClick="@((e) => GoToJob(result))" Variant="Variant.Outlined" Color="Color.Success" style="margin-right:50px">Job Details</MudButton>
-                            <MudButton Variant="Variant.Outlined" OnClick="@((e) => ShowConfirmation2(result))" Color="Color.Success">TM Query</MudButton>
+                            @* <MudButton Variant="Variant.Outlined" OnClick="@((e) => ShowConfirmation2(result))" Color="Color.Success">TM Query</MudButton> *@
                             <MudButton Variant="Variant.Outlined" Color="Color.Success" OnClick="@((e) => ShowConfirmation(result))">Job Closed</MudButton>
                            @*  <MudButton Variant="Variant.Outlined" Color="Color.Success" @onclick="@(() => UpdateJobBooked22(result))">Submission Done</MudButton> *@
                         </td>

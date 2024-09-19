@@ -39,27 +39,43 @@
 
 
 
-<div style="width:100%; display:flex" class="mt-3 ml-7">
-	<div >
-		<MudButton Href="/CheckList" Variant="Variant.Filled" Color="Color.Primary">FULL CHECKLiST</MudButton>
-	</div>
-	<div class="ml-2">
-		<MudButton OnClick="ShowConfirmation" Variant="Variant.Filled" Color="Color.Primary">ASSiGN JOB</MudButton>
-	</div>
-	<div class="ml-2">
-		<MudButton OnClick="OpenOverlayPopup" Variant="Variant.Filled" Color="Color.Primary">ADD NOTE</MudButton>
-	</div>
-	<div class="ml-2">
-		<MudButton OnClick="ShowConfirmationCanceljob" Variant="Variant.Filled" Color="Color.Primary">Cancel Job</MudButton>
-	</div>
-	<div class="ml-2">
-		<MudButton OnClick="ShowConfirmationRejectjob" Variant="Variant.Filled" Color="Color.Primary">Reject Job</MudButton>
-	</div>
+		<div class="mt-3 ml-7" style="width:100%;">
+			@if (JobForm1Records != null && JobForm1Records.Count > 0)
+			{
+				<h1 style="display:block">
+					@foreach (var record in JobForm1Records)
+					{
+						@record.PropertyNo @record.coma @record.AddressLine1 @record.coma @record.Town @record.coma @record.Postcode
+					}
+				</h1>
+			}
 
-</div>
+			<div style="display:flex; justify-content: start; flex-wrap: wrap; margin-top: 20px;">
+				<div style="margin-right: 10px;">
+					<MudButton Href="/CheckList" Variant="Variant.Filled" Color="Color.Primary">FULL CHECKLiST</MudButton>
+				</div>
+				<div style="margin-right: 10px;">
+					<MudButton OnClick="ShowConfirmation" Variant="Variant.Filled" Color="Color.Primary">ASSiGN JOB</MudButton>
+				</div>
+				<div style="margin-right: 10px;">
+					<MudButton OnClick="OpenOverlayPopup" Variant="Variant.Filled" Color="Color.Primary">ADD NOTE</MudButton>
+				</div>
+				<div style="margin-right: 10px;">
+					<MudButton OnClick="ShowConfirmationCanceljob" Variant="Variant.Filled" Color="Color.Primary">Cancel Job</MudButton>
+				</div>
+				<div style="margin-right: 10px;">
+					<MudButton OnClick="ShowConfirmationRejectjob" Variant="Variant.Filled" Color="Color.Primary">Reject Job</MudButton>
+				</div>
+				<div style="margin-right: 10px;">
+					<MudButton OnClick="((e) => ShowConfirmation2(null))" Variant="Variant.Filled" Color="Color.Primary">Assign TM Query</MudButton>
+				</div>
+
+			</div>
+		</div>
 
 
-<h3 class="mt-3 ml-7"><b>Job Status</b></h3>
+
+		<h3 class="mt-3 ml-7"><b>Job Status</b></h3>
 
 
 
@@ -1311,6 +1327,56 @@ else
         </MudAlert>
         </NotAuthorized>
 </AuthorizeView>
+<MudOverlay @bind-Visible="PopUpTMQ" DarkBackground="true" AutoClose="false">
+	<MudPopover Open="@PopUpTMQ" AnchorOrigin="Origin.CenterCenter" TransformOrigin="Origin.CenterCenter">
+
+		<MudCard>
+			<MudCardHeader Style="border-bottom:1px solid #DEE2E6">
+				<MudText Typo="Typo.h5">TM Queries</MudText>
+			</MudCardHeader>
+			<MudCardContent>
+
+				<MudGrid>
+					<MudItem xs="4">
+						<MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" Disabled="true" @bind-Value="_textA" Label="Trust Mark" />
+					</MudItem>
+					<MudItem xs="4">
+						<MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" @bind-Value="_textB" Label="TM Query Text" />
+					</MudItem>
+					<MudItem>
+						<MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="AddItem">Add</MudButton>
+					</MudItem>
+					<MudItem>
+						<MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="SaveItems">Save</MudButton>
+					</MudItem>
+				</MudGrid>
+
+				<MudTable Items="items">
+					<HeaderContent>
+						<MudTh>TM</MudTh>
+						<MudTh>TM Query Text</MudTh>
+						<MudTh>Actions</MudTh>
+					</HeaderContent>
+					<RowTemplate>
+						<MudTd DataLabel="Item">@context.TextA</MudTd>
+						<MudTd DataLabel="Item">@context.TextB</MudTd>
+						<MudTd DataLabel="Action">
+							<MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => RemoveItem(context)" />
+						</MudTd>
+
+
+					</RowTemplate>
+				</MudTable>
+
+
+			</MudCardContent>
+			<MudCardActions Style="justify-content:end">
+				<MudButton OnClick="closeConfirmation2" Color="Color.Error">Cancel</MudButton>
+
+			</MudCardActions>
+		</MudCard>
+	</MudPopover>
+</MudOverlay>
 @code{
 	
     public void Navi()
@@ -1357,7 +1423,124 @@ else
 			Snackbar.Add(errorMessage, Severity.Error);
 		}
 	}
+	public class JobFormRecord
+	{
+		public int Id { get; set; }
+		public string RefNo { get; set; }
 
+		public string AddressLine1 { get; set; }
+
+		public string SurveyName { get; set; }
+
+		public int Status { get; set; }
+	}
+	public class FormModel
+	{
+		public int Id { get; set; }
+		public int FormId { get; set; }
+		public int Status { get; set; }
+		public JobFormRecord JobFormRecord { get; set; }
+	}
+	private string _textA;
+	private string _textB;
+	private List<Item> items = new List<Item>();
+	public class Item
+	{
+		public string TextA { get; set; } = "Trust Mark";
+		public string TextB { get; set; }
+		public string Status { get; set; } = "Awaiting";
+	}
+	private bool PopUpTMQ = false;
+
+	private void ShowConfirmation2(FormModel result)
+    {
+        // constant.FormId = result.JobFormRecord.Id;
+       // constant.FormId = 1;
+        PopUpTMQ = true;
+
+
+    }
+	private void closeConfirmation2()
+	{
+		constant.FormId = 0;
+		PopUpTMQ = false;
+		_textB = string.Empty;
+		items.Clear();
+	}
+	private void RemoveItem(Item item)
+	{
+		items.Remove(item);
+	}
+	private void AddItem()
+	{
+		if (!string.IsNullOrEmpty(_textB))
+		{
+			// Check if an item with the same TextB already exists
+			bool itemExists = items.Any(item => item.TextB.Equals(_textB, StringComparison.OrdinalIgnoreCase));
+
+			if (!itemExists)
+			{
+				items.Add(new Item { TextA = "Trust Mark", TextB = _textB, Status = "Awaiting" });
+				_textB = string.Empty; // Clear the input field after adding
+			}
+			else
+			{
+				// Optionally, you can show a message or notification that the item already exists
+				Snackbar.Add("Item already exists.", Severity.Error);
+			}
+		}
+	}
+	private List<FormModel> formList = new List<FormModel>();
+
+	private void SaveItems()
+	{
+		var dataToSend = items
+	.Select(q => new { q.TextA, q.TextB, FormNo = constant.FormId, q.Status })
+	.ToList();
+		if (dataToSend.Count == 0)
+		{
+			Snackbar.Add("Please add atleast one record", Severity.Error);
+
+		}
+		else
+		{
+			DateTime utcTime = DateTime.UtcNow;
+			TimeZoneInfo londonTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Europe/London");
+			londonTime = TimeZoneInfo.ConvertTimeFromUtc(utcTime, londonTimeZone);
+			using (var httpClient = new HttpClient())
+				try
+				{
+					string jsonData = JsonConvert.SerializeObject(dataToSend);
+					var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+
+					var response = httpClient.PostAsync(constant.SaveTMQItemsList, content).Result;
+
+					if (response.IsSuccessStatusCode)
+					{
+
+						DeleteRecordClass.DeleteRecordInFormJob(constant.FormId, 21);
+						AddRecordClass.AddRecordInFormJob(constant.FormId, 45);
+						AuditClasss.Audit(constant.FormId, constant.LoginUserName, londonTime, "TM Quries");
+						var obj = formList.FirstOrDefault(x => x.FormId == constant.FormId);
+						formList.Remove(obj);
+						Snackbar.Add("TM Quries Added", Severity.Success);
+						items.Clear();
+						_textB = string.Empty;
+						PopUpTMQ = false;
+						StateHasChanged();
+					}
+					else
+					{
+						var errorMessage = response.Content.ReadAsStringAsync().Result;
+						Snackbar.Add(errorMessage, Severity.Error);
+					}
+				}
+				catch (Exception e)
+				{
+					Snackbar.Add("Try Catch Error: " + e, Severity.Error);
+				}
+		}
+	}
 	private async Task DeleteBetWeenIn2()
 	{
 		DateTime utcTime = DateTime.UtcNow;
@@ -1630,7 +1813,7 @@ else
 			using var httpClient = new HttpClient();
 			string jsonData = JsonConvert.SerializeObject(data);
 			var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
-			var response = await httpClient.PostAsync(constant.UpdateJobNote, content);
+			var response = await httpClient.PostAsync(constant.AddJobNote, content);
 
 			if (response.IsSuccessStatusCode)
 			{
@@ -1788,11 +1971,11 @@ else
 	private List<PostStageDatesRecord> PostStageDatesRecords { get; set; }
 	private List<FunderQueryRecord> FunderQueryRecords { get; set; }
 	private List<TMQueryRecord> TMQueryRecords { get; set; }
+	bool loading = true;
 
 	protected override void OnInitialized()
 	{
-
-
+		Form1BySat21();
 		LoadFormData();
 		GetCompanyList();
 		GetMeasureList();
@@ -1800,6 +1983,37 @@ else
 
 
 	}
+	private async Task Form1BySat21()
+	{
+		using (var httpClient = new HttpClient())
+			try
+			{
+				var response = await httpClient.GetAsync(constant.Form1BySat21);
+				if (response.IsSuccessStatusCode)
+				{
+
+
+					var jsonString = await response.Content.ReadAsStringAsync();
+					formList = JsonConvert.DeserializeObject<List<FormModel>>(jsonString).ToList();
+					loading = false;
+					StateHasChanged();
+				}
+				else
+				{
+					loading = false;
+					var errorMessage = await response.Content.ReadAsStringAsync();
+					Snackbar.Add(errorMessage, Severity.Error);
+				}
+
+			}
+			catch (Exception e)
+			{
+
+				Snackbar.Add("Try Catch Error: " + e, Severity.Error);
+			}
+
+	}
+
 	private async Task LoadFormData()
 	{
 		try
