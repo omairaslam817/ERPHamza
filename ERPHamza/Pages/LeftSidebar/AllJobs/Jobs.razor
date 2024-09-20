@@ -1378,11 +1378,11 @@ else
 	</MudPopover>
 </MudOverlay>
 @code{
-	
-    public void Navi()
-    {
-        NavigationManager.NavigateTo("/", forceLoad: true);
-    }
+
+	public void Navi()
+	{
+		NavigationManager.NavigateTo("/", forceLoad: true);
+	}
 	private List<string> CompList;
 	private List<string> MeasuerList;
 	private string selectedscompany;
@@ -1453,13 +1453,13 @@ else
 	private bool PopUpTMQ = false;
 
 	private void ShowConfirmation2(FormModel result)
-    {
-        // constant.FormId = result.JobFormRecord.Id;
-       // constant.FormId = 1;
-        PopUpTMQ = true;
+	{
+	// constant.FormId = result.JobFormRecord.Id;
+		// constant.FormId = 1;
+		PopUpTMQ = true;
 
 
-    }
+	}
 	private void closeConfirmation2()
 	{
 		constant.FormId = 0;
@@ -1701,18 +1701,18 @@ else
 				if (string.IsNullOrEmpty(selectedsMeasure))
 				{
 					Snackbar.Add("Measure is required", Severity.Error);
-                    return;
+					return;
 				}
 				if (string.IsNullOrEmpty(selectedsInspection))
-                {
-                    Snackbar.Add("Inspection is required", Severity.Error);
-                    return;
-                }
+				{
+					Snackbar.Add("Inspection is required", Severity.Error);
+					return;
+				}
 				if (string.IsNullOrEmpty(selectedsMonth))
-                {
-                    Snackbar.Add("Month is required", Severity.Error);
-                    return;
-                }
+				{
+					Snackbar.Add("Month is required", Severity.Error);
+					return;
+				}
 				DateTime utcTime = DateTime.UtcNow;
 				TimeZoneInfo londonTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Europe/London");
 				londonTime = TimeZoneInfo.ConvertTimeFromUtc(utcTime, londonTimeZone);
@@ -1720,23 +1720,23 @@ else
 				var content = new StringContent(json, Encoding.UTF8, "application/json");
 				var response = await httpClient.PostAsync(constant.AssignToInspection, content);
 				if (response.IsSuccessStatusCode)
-                {
+				{
 					AuditClasss.Audit(constant.FormId, constant.LoginUserName, londonTime, "Assigned job to inspection");
 					AddRecordClass.AddRecordInFormJob(constant.FormId, 46);
 					PopUpAssign = false;
-                    Snackbar.Add("Assigned job to inspection", Severity.Success);
-                }
-                else
-                {
+					Snackbar.Add("Assigned job to inspection", Severity.Success);
+				}
+				else
+				{
 					PopUpAssign = false;
-                    var x = response.Content.ReadAsStringAsync();
-                    Snackbar.Add(x.ToString(), Severity.Error);
+					var x = response.Content.ReadAsStringAsync();
+					Snackbar.Add(x.ToString(), Severity.Error);
 
-                }
+				}
 			}
 			catch(Exception ex)
 			{
-				                Snackbar.Add("Error: Call To Developer", Severity.Error);
+				Snackbar.Add("Error: Call To Developer", Severity.Error);
 			}
 
 
@@ -1746,11 +1746,11 @@ else
 
 
 
-		
 
 
 
-		
+
+
 	}
 
 	// public async Task AssignToC3()
@@ -1772,7 +1772,7 @@ else
 
 
 
-	
+
 
 
 
@@ -1798,18 +1798,22 @@ else
 		MudOverlayPopup = false;
 		StateHasChanged();
 	}
+
 	private async Task SubmitJobNote()
 	{
-		var data = new
-		{
-			Id=constant.FormId,
-			jobNote=model.JobNote
-
-		};
-
-
+		
 		try
 		{
+			DateTime utcTime = DateTime.UtcNow;
+			TimeZoneInfo londonTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Europe/London");
+			londonTime = TimeZoneInfo.ConvertTimeFromUtc(utcTime, londonTimeZone);
+			var data = new
+			{
+				Id = constant.FormId,
+				jobNote = model.JobNote,
+				CreatedBy = constant.LoginUserName,
+				CDate = londonTime
+			};
 			using var httpClient = new HttpClient();
 			string jsonData = JsonConvert.SerializeObject(data);
 			var content = new StringContent(jsonData, Encoding.UTF8, "application/json");

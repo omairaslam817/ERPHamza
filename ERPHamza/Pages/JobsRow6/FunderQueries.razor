@@ -331,7 +331,8 @@ else
 </MudOverlay>
 
 
-@code{public void GoToJob(FormModel result){constant.FormId = result.JobFormRecord.Id;NavigationManager.NavigateTo("/job", true);}
+@code{
+    public void GoToJob(FormModel result){constant.FormId = result.JobFormRecord.Id;NavigationManager.NavigateTo("/job", true);}
     public void Navi()
     {
         NavigationManager.NavigateTo("/", forceLoad: true);
@@ -402,8 +403,8 @@ else
     {
         constant.FormId = result.JobFormRecord.Id;
         PopUpConfirm = true;
-        
-        
+
+
     }
     private void closeConfirmation()
     {
@@ -554,8 +555,8 @@ else
     }
     public class Q
     {
-       
-        
+
+
         public int Id { get; set; }
         public string FunderText { get; set; }
         public string Status { get; set; }
@@ -643,8 +644,23 @@ else
 
         public int Status { get; set; }
         public Nullable<bool> isLogemnt { get; set; }
-    }
+        public List<JobFormNote> JobFormNotes { get; set; }
 
+    }
+    public class JobFormNote
+    {
+
+        public int Id { get; set; }
+
+        public string Note { get; set; }
+
+        public string CreatedBy { get; set; }
+
+        public Nullable<System.DateTime> CDate { get; set; }
+
+        public Nullable<int> JobFormId { get; set; }
+
+    }
     public class FormModel
     {
         public int Id { get; set; }
@@ -675,8 +691,23 @@ else
 
 
                     var jsonString = await response.Content.ReadAsStringAsync();
-                    formList = JsonConvert.DeserializeObject<List<FormModel>>(jsonString).ToList();
-                    loading = false;
+                    formList = JsonConvert.DeserializeObject<List<FormModel>>(jsonString)
+                        .Select(item => new FormModel
+                            {
+                                Id = item.Id,
+                                FormId = item.Id, // Assuming FormId is the same as Id in this context
+                                Status = item.Status,
+                                JobFormRecord = new JobFormRecord
+                                {
+                                    Id = item.Id,
+                                    RefNo = item.JobFormRecord.RefNo,
+                                    AddressLine1 = item.JobFormRecord.AddressLine1,
+                                    SurveyName = item.JobFormRecord.SurveyName,
+                                    Status = item.Status,
+                                    isLogemnt = item.JobFormRecord.isLogemnt,
+                                    JobFormNotes = item.JobFormRecord.JobFormNotes // Ensure this is populated correctly
+                                }
+                            }).ToList(); loading = false;
                     StateHasChanged();
                 }
                 else

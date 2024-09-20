@@ -34,6 +34,7 @@ namespace ERPHamza.Data
         public static string UpdateJobBooked22 = BaseUrl + "job/UpdateJobTo22"; //update status to 22
         public static string UpdateJobBooked23 = BaseUrl + "job/UpdateJobTo23"; //update status to 23
         public static string UpdateJobBooked24 = BaseUrl + "job/UpdateJobTo24"; //update status to 24
+        public static string UpdateFullPaid50 = BaseUrl + "job/UpdateFullPaid50"; //update status to 50
 
         public static string UpdateJobToIPAD25 = BaseUrl + "job/UpdateJobToIPAD25"; //update status to 24
         public static string UpdateJobToIPAD26 = BaseUrl + "job/UpdateJobToIPAD26"; //update status to 24

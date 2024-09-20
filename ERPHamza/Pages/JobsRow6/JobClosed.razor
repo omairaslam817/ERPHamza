@@ -253,7 +253,7 @@ else
                 string jsonData = JsonConvert.SerializeObject(Data);
                 var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
 
-                var response = await httpClient.PostAsync(constant.UpdateJobBooked24, content);
+                var response = await httpClient.PostAsync(constant.UpdateFullPaid50, content);
 
                 if (response.IsSuccessStatusCode)
                 {
