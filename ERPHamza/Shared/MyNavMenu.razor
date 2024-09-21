@@ -1,4 +1,6 @@
 ﻿@using ERPHamza.Data
+@using Newtonsoft.Json
+@using static ERPHamza.Pages.LeftSidebar.Quries.Job_Stages.JobStages
 
 <MudNavMenu>
     <MudNavLink Href="/index" Match="NavLinkMatch.All">
@@ -29,14 +31,27 @@
     </MudNavGroup> *@
 
     <MudNavLink Href="/AssignToInspection" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AssignmentTurnedIn" Title="Inspection reports">Inspection reports</MudNavLink>
+    <MudNavLink Href="/JobStages" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.WorkOutline" Title="Job Queries">
+        @if (Checklists.Count > 0)
+        {
+            <MudBadge Content="@(Checklists.Count)" Overlap="true" Color="Color.Warning">Job Queries</MudBadge>
+        }
+        else
+        {
+            <span>Job Queries</span>
+        }
+    </MudNavLink>
 
-   <MudNavLink Href="/JobStages" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.WorkOutline" Title="Job Queries">
-    Job Queries
-</MudNavLink>
-
-<MudNavLink Href="/TMQ" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.QuestionAnswer" Title="TM Queries">
-    TM Queries
-</MudNavLink>
+    <MudNavLink Href="/TMQ" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.QuestionAnswer" Title="TM Queries">
+        @if (constant.status45Count > 0)
+        {
+            <MudBadge Content="@constant.status45Count" Overlap="true" Color="Color.Success">TM Queries</MudBadge>
+        }
+        else
+        {
+            <span>TM Queries</span>
+        }
+    </MudNavLink>
 
 
    @*  <MudNavGroup Icon="@Icons.Material.Filled.QueryStats" Title="Queries stages">
@@ -89,3 +104,35 @@
 
 
 </MudNavMenu>
+@code{
+    protected override void OnInitialized()
+    {
+        Form1BySat11();
+    }
+    List<CheckListRecord> Checklists = new List<CheckListRecord>();
+
+    List<FormResponse> formList = new List<FormResponse>();
+    private async Task Form1BySat11()
+    {
+        using (var httpClient = new HttpClient())
+        {
+            try
+            {
+                var response = await httpClient.GetAsync(constant.GetCheckListStatus);
+                if (response.IsSuccessStatusCode)
+                {
+                    var jsonString = await response.Content.ReadAsStringAsync();
+                    formList = JsonConvert.DeserializeObject<List<FormResponse>>(jsonString).ToList();
+                    
+                    Checklists = formList.SelectMany(f => f.CheckListRecord).ToList();
+                    // formList = JsonSerializer.Deserialize<List<FormResponse>>(jsonString);
+                }
+                
+            }
+            catch (Exception e)
+            {
+            }
+        }
+    }
+
+}

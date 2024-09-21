@@ -39,12 +39,7 @@ else{
 <AuthorizeView>
     <Authorized>
 <div class="row">
-    <div class="col-3 mt-2 ">
-        <h4 style="margin-left:20px"> </h4>
-    </div>
-    <div class="col-6 mt-2 mb-1">
-    </div>
-    <div class="col-3 mt-2 mb-1">
+    <div class="col-12 mx-3 mt-2 mb-1">
         <MudButton Href="/addjobs" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Style="background:#9b2bb2;color:white">Add new Job</MudButton>
   @*       <MudButton OnClick="ShowConfirmation" Style="background:#fd9700;color:white" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Search">Search</MudButton>
     *@ </div>
@@ -57,7 +52,7 @@ else{
         <h4>Job Work Flow</h4>
     </div>
 
-    <div class="col-3" style="margin-left:45%">
+    <div class="col-3" style="margin-left:24%">
     <h4>Installation Work Flow</h4>
     </div>
 </div>
@@ -1137,7 +1132,7 @@ else{
 
                     status1Count = statusCounts.ContainsKey("status1") ? statusCounts["status1"] : 0;
                     status2Count = statusCounts.ContainsKey("status2") ? statusCounts["status2"] : 0;
-                    status3Count = statusCounts.ContainsKey("status3") ? statusCounts["status3"] : 0;
+                   constant.status3Count = statusCounts.ContainsKey("status3") ? statusCounts["status3"] : 0;
                     status4Count = statusCounts.ContainsKey("status4") ? statusCounts["status4"] : 0;
                     status5Count = statusCounts.ContainsKey("status5") ? statusCounts["status5"] : 0;
                     status6Count = statusCounts.ContainsKey("status6") ? statusCounts["status6"] : 0;
@@ -1186,7 +1181,6 @@ else{
                    status49Count = statusCounts.ContainsKey("status49") ? statusCounts["status49"] : 0;//rejected job
                    status50Count = statusCounts.ContainsKey("status50") ? statusCounts["status50"] : 0;//full paid job
 
-                    
 
 
                     StateHasChanged();

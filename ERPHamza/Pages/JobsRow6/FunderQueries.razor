@@ -87,15 +87,15 @@ else
                 @foreach (var result in formList)
                 {
 
-                    <tr>
+                            <tr @onmousedown="@(e => SelectRow(result))">
                         <th scope="row">@(formList.IndexOf(result) + 1)</th>
                         <td>@result.JobFormRecord.RefNo</td>
-                        <td>@result.JobFormRecord.AddressLine1</td>
+                                <td>@result.JobFormRecord.PropertyNo @coma @result.JobFormRecord.AddressLine1 @coma @result.JobFormRecord.Town @coma @result.JobFormRecord.Postcode</td>
                         <td>
                              <MudButton OnClick="@((e) => GoToJob(result))" Variant="Variant.Outlined" Color="Color.Success" style="margin-right:50px">Job Details</MudButton>
                             @* <MudButton Variant="Variant.Outlined" Color="Color.Success" OnClick="@((e) => OpenDialog2(maxWidth,result))">Query Done</MudButton>*@
-                            <MudButton Variant="Variant.Outlined" Color="Color.Success" OnClick="@((e) => OpenOverlay(result))">Queries Queue</MudButton>
-                            <MudButton Variant="Variant.Outlined" Color="Color.Success" OnClick="@((e) => ShowConfirmation(result))">Job Closed</MudButton>
+                            <MudButton Variant="Variant.Outlined" class="mr-5" Color="Color.Success" OnClick="@((e) => OpenOverlay(result))">Queries Queue</MudButton>
+                            @* <MudButton Variant="Variant.Outlined" Color="Color.Success" OnClick="@((e) => ShowConfirmation(result))">Job Closed</MudButton> *@
                             @if (result.JobFormRecord.isLogemnt ?? false)
                             {
                                 <MudButton Variant="Variant.Filled" OnClick="@((e) => ShowConfirmationLogemtRecive(result))" Color="Color.Success">Lodgement recive</MudButton>
@@ -134,91 +134,49 @@ else
 
 @* /popover 1 start/ *@
 <MudOverlay @bind-Visible="MudOverlay1" DarkBackground="true" ZIndex="9999" AutoClose="false">
-   
-   
-       
-     
-    
-        @if (LoadList)
-        {
-            <MudCard>
-               
-            
-       
-        <MudCardContent>
-                    <MudTable id="xyz" Items="queries">
-                        <HeaderContent>
-                            <MudTh>Select</MudTh>
-                            <MudTh>Query</MudTh>
-                            <MudTh>Status</MudTh>
-                        </HeaderContent>
-                        <RowTemplate>
-                            <MudTd>
-                                <MudCheckBox Color="Color.Tertiary" @bind-Checked="@context.IsSelected" />
-                            </MudTd>
-                            <MudTd>@context.FunderText</MudTd>
-                            <MudTd>@context.Status</MudTd>
-                        </RowTemplate>
-                    </MudTable>
-                    @if (queries == null || !queries.Any())
-                    {
-                        <style>
-                            #xyz{display:none;}
-                        </style>
+    @if (LoadList)
+    {
+        <MudCard>
+            <MudCardContent>
+                <MudTable id="xyz" Items="queries" Style="width: 805px;">
+                    <HeaderContent>
+                        <MudTh>Select</MudTh>
+                        <MudTh>Query</MudTh>
+                        <MudTh>Status</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd>
+                            <MudCheckBox Color="Color.Tertiary" @bind-Checked="@context.IsSelected" />
+                        </MudTd>
+                        <MudTd>@context.FunderText</MudTd>
+                        <MudTd>@context.Status</MudTd>
+                    </RowTemplate>
+                </MudTable>
+                @if (queries == null || !queries.Any())
+                {
+                    <style>
+                        #xyz {
+                            display: none;
+                        }
+                    </style>
                     <p class="mt-2"><b>No Queries Found</b></p>
-                    
-                    }
-                </MudCardContent>
-        
-                <center>
-                    
-
-                    
-@*                     @if (queries.Count == bookedCount)
-                    {
-
-                
-                        <MudButton Class="mb-2 ml-6 mr-6" Variant="Variant.Filled" Color="Color.Success" OnClick="@(e => ToggleOverlay(false))">OK</MudButton>
-                   
-                    }
-                    else
-                    {
-                
-                        <MudButton Class="mb-2" Variant="Variant.Filled" Color="Color.Error" OnClick="@(e => ToggleOverlay(false))">Cancel</MudButton>
-                        <MudButton Class="mb-2" Variant="Variant.Filled" Color="Color.Success" OnClick="OpenOverlay2">Book</MudButton>
-                    <MudButton Class="mb-2" Variant="Variant.Filled" Color="Color.Success" OnClick="OnDoneSubmit">Done</MudButton>
-                   
-                        
-                    } *@
-                
-
-
-                    <MudButton Class="mb-2 ml-6 mr-6" Variant="Variant.Filled" Color="Color.Success" OnClick="@(e => ToggleOverlay(false))">OK</MudButton>
-
-               
-
-                    <MudButton Class="mb-2" Variant="Variant.Filled" Color="Color.Error" OnClick="@(e => ToggleOverlay(false))">Cancel</MudButton>
-                    <MudButton Class="mb-2" Variant="Variant.Filled" Color="Color.Success" OnClick="OpenOverlay2">Book</MudButton>
-                    <MudButton Class="mb-2" Variant="Variant.Filled" Color="Color.Success" OnClick="OnDoneSubmit">Done</MudButton>
-
-
-                
-
-           
-                </center>
-
+                }
+            </MudCardContent>
+            <center>
+                <div style="display: flex; justify-content: center; gap: 10px;">
+                    <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="@(e => ToggleOverlay(false))" Class="mb-2">OK</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="@((e) => OpenDialog3(maxWidth, selectedResult))" Class="mb-2">Add</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="@(e => ToggleOverlay(false))" Class="mb-2">Cancel</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="OpenOverlay2" Class="mb-2">Book</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="OnDoneSubmit" Class="mb-2">Done</MudButton>
+                </div>
+            </center>
         </MudCard>
     }
     else
     {
         <MudProgressCircular>Loading...</MudProgressCircular>
     }
-
-
-
-       
-
-
 </MudOverlay>
 @* /popover 1 end / *@
 
@@ -255,14 +213,14 @@ else
 
             </div>
         </div>
-        <div class="row">
-            <div class="col">
-                <MudTextField @bind-Value="TimeValue" Label="Time" Variant="Variant.Outlined" Margin="Margin.Dense"></MudTextField>
+            <div class="row">
+                <div class="col">
+                    <MudTextField @bind-Value="DateValue" Label="Date" Variant="Variant.Outlined" Margin="Margin.Dense" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.DateRange"></MudTextField>
+                </div>
+                <div class="col">
+                    <MudTextField @bind-Value="TimeValue" Label="Time" Variant="Variant.Outlined" Margin="Margin.Dense" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.AccessTime"></MudTextField>
+                </div>
             </div>
-            <div class="col">
-                <MudTextField @bind-Value="DateValue" Label="Date" Variant="Variant.Outlined" Margin="Margin.Dense"></MudTextField>
-            </div>
-        </div>
         <center>
                 <MudButton Class="mt-4" Variant="Variant.Filled" Color="Color.Error" OnClick="@(e => ClosePopip2(false))">Cancel</MudButton>
             <MudButton Class="mt-4" Variant="Variant.Filled" Color="Color.Success" OnClick="OnSubmit">Book</MudButton>
@@ -418,7 +376,7 @@ else
     private bool PopUpConfirm =false;
     private string TimeValue;
     private string DateValue;
-
+    public string coma { get; set; } = "-";
     private string selectedName;
     private List<string> NameList;
     private string selectedLdGen;
@@ -493,8 +451,20 @@ else
             }
 
     }
+    private FormModel selectedResult;
 
+    private void SelectRow(FormModel model)
+    {
+        selectedResult = model;
+    }
+    DialogOptions maxWidth = new DialogOptions() { MaxWidth = MaxWidth.Medium, FullWidth = true, CloseButton = true };
 
+    private void OpenDialog3(DialogOptions options,FormModel  model)
+    {
+        MudOverlay1 = false;
+        constant.FormId = model.JobFormRecord.Id;
+        DialogService.Show<SubmissionDoneDialog3>("Custom Options Dialog", options);
+    }
 
     public void OpenOverlay2()
     {
@@ -641,7 +611,9 @@ else
         public string AddressLine1 { get; set; }
 
         public string SurveyName { get; set; }
-
+        public string PropertyNo { get; set; }
+        public string Town { get; set; }
+        public string Postcode { get; set; }
         public int Status { get; set; }
         public Nullable<bool> isLogemnt { get; set; }
         public List<JobFormNote> JobFormNotes { get; set; }
@@ -666,6 +638,13 @@ else
         public int Id { get; set; }
         public int FormId { get; set; }
         public int Status { get; set; }
+        public string PropertyNo { get; set; }
+
+        public string AddressLine1 { get; set; }
+
+        public string Town { get; set; }
+
+        public string Postcode { get; set; }
         public JobFormRecord JobFormRecord { get; set; }
     }
 
@@ -704,6 +683,9 @@ else
                                     AddressLine1 = item.JobFormRecord.AddressLine1,
                                     SurveyName = item.JobFormRecord.SurveyName,
                                     Status = item.Status,
+                                    Postcode = item.JobFormRecord.Postcode,
+                                    PropertyNo = item.JobFormRecord.PropertyNo,
+                                    Town = item.JobFormRecord.Town,
                                     isLogemnt = item.JobFormRecord.isLogemnt,
                                     JobFormNotes = item.JobFormRecord.JobFormNotes // Ensure this is populated correctly
                                 }
@@ -732,7 +714,6 @@ else
 
 
 
-    DialogOptions maxWidth = new DialogOptions() { MaxWidth = MaxWidth.Medium, FullWidth = true, CloseButton = true };
 
     private void OpenDialog(DialogOptions options, FormModel result)
     {

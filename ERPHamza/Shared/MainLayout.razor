@@ -21,12 +21,12 @@
         <AuthorizeView>
             <Authorized>
                 <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
-                <MudButton OnClick="ShowConfirmation" Variant="Variant.Outlined" Color="Color.Dark" StartIcon="@Icons.Material.Filled.Search">Search</MudButton>
+                <MudButton OnClick="ShowConfirmation" Variant="Variant.Outlined" Style="color:#0093D8" StartIcon="@Icons.Material.Filled.Search">Search</MudButton>
                     <MudSpacer />
                 
                 &nbsp;
                 <MudText Style="color:black">@constant.LoginUserName</MudText> &nbsp;
-                <MudButton  OnClick="logout" href="javascript:void(0)"> Logout</MudButton>
+                <MudButton  OnClick="logout" href="javascript:void(0)" style="color:red"> Logout</MudButton>
             
             </Authorized>
             <NotAuthorized>

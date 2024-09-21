@@ -245,6 +245,7 @@ namespace ERPHamza.Data
         public static string refno;
         public static int FormId = 0;
         public static int status45Count = 0;
+        public static int status3Count = 0;
         public static bool success = false;
 
 
